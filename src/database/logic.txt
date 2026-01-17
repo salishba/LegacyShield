@@ -1,0 +1,110 @@
+LegacyShield/
+├── agent/
+├── catalogue/
+├── risk_engine/
+├── runtime/
+├── api/
+├── storage/
+├── cli/
+├── schemas/
+├── utils/
+└── docs/
+
+ai/
+├── datasets/
+│   ├── exposure_snapshots.parquet
+│   ├── mitigation_outcomes.parquet
+│   └── risk_labels.parquet
+├── feature_engineering/
+│   ├── exposure_features.py
+│   ├── host_features.py
+│   └── mitigation_features.py
+├── models/
+│   ├── risk_adjuster.pkl
+│   ├── mitigation_ranker.pkl
+│   └── confidence_estimator.pkl
+├── training/
+│   ├── train_risk_adjuster.py
+│   ├── train_mitigation_ranker.py
+│   └── evaluate.py
+├── inference/
+│   ├── adjust_risk.py
+│   └── rank_mitigations.py
+└── model_card.md
+
+
+agent/
+├── scanner.py
+├── os_profile.py
+├── patch_state.py
+├── service_state.py
+├── registry_state.py
+├── network_state.py
+└── models.py
+
+catalogue/
+├── ingest/
+│   ├── msrc_ingest.py
+│   ├── cve_ingest.py
+│   ├── mitigation_ingest.py
+│   └── supersedence_ingest.py
+├── resolver/
+│   ├── cve_resolver.py
+│   ├── kb_resolver.py
+│   └── supersedence.py
+└── schema.md
+
+risk_engine/
+├── exposure_engine.py
+├── applicability_engine.py
+├── hars/
+│   ├── base.py
+│   ├── exploitability.py
+│   ├── reachability.py
+│   ├── mitigation_state.py
+│   └── score.py
+├── prioritizer.py
+└── models.py
+
+Step-by-step logic
+Exposure Engine
+CVE exists in catalogue
+KB not installed
+Applies to OS build
+Applicability Engine
+Service enabled?
+Port reachable?
+Feature installed?
+
+HARS Score
+Risk = Severity × Exploitability × Reachability × (1 − Mitigation)
+
+
+Prioritizer
+Sort by risk
+Tag critical vs deferrable
+
+runtime/
+├── db.py
+├── models.py
+├── store_scan.py
+├── store_risk.py
+└── store_mitigations.py
+
+cli/
+├── scan.py
+├── score.py
+├── report.py
+└── harden.py
+
+schemas/
+├── host_scan.json
+├── exposure.json
+├── risk_score.json
+└── mitigation.json
+
+utils/
+├── logging.py
+├── hashing.py
+├── time.py
+└── validation.py

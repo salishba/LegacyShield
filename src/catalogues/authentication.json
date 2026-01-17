@@ -1,0 +1,297 @@
+{
+  "metadata": {
+    "version": "1.0.1",
+    "generated_date": "2025-12-30",
+    "description": "SmartPatch Authentication Controls — production-grade schema (AUTH-01 .. AUTH-04). Each control contains enforcement commands, validation checks, failure modes, privileges and authoritative references.",
+    "author": "SmartPatch Team (converted)",
+    "source_of_truth": ["Microsoft Docs", "CIS / STIG guidance"]
+  },
+  "controls": [
+    {
+      "control_id": "AUTH-01",
+      "name": "Disable LM hash storage",
+      "category": "AUTHENTICATION",
+      "description": "Prevent storage of LAN Manager (LM) password hashes. LM hashes are weak and enable easy offline cracking; disable storage so new password changes do not store LM hashes.",
+      "rationale": "Preventing LM hash storage mitigates use of legacy weak hashes for offline credential attacks; existing LM hashes remain until passwords are changed.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later (client & server)", "supported": true, "notes": "Older pre-Windows-7 systems may behave differently; password rotation required to remove existing LM hashes." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Registry (recommended)",
+          "commands": [
+            "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" /v NoLMHash /t REG_DWORD /d 1 /f"
+          ],
+          "notes": "Set NoLMHash = 1 to prevent storage of LM hashes for future password changes. Existing LM hashes remain until users change passwords."
+        },
+        {
+          "type": "Group Policy (domain-managed)",
+          "description": "Use baseline policies and stage password change campaign; enforce via configuration management.",
+          "notes": "There is no single GPO toggle that retroactively removes existing LM hashes; plan password resets for accounts with LM present."
+        }
+      ],
+      "validation_checks": [
+        {
+          "type": "Registry check",
+          "command": "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" /v NoLMHash",
+          "success_criteria": "NoLMHash exists and equals 0x1 (REG_DWORD)."
+        },
+        {
+          "type": "Verify no LM hashes present (post-password-change)",
+          "command": "Audit: extract hashes from NTDS.dit/LSA secrets with safe-forensic tooling in a lab, or verify via vendor tooling that LM hashes are absent after password change.",
+          "success_criteria": "No account returns a stored LM hash; only NT hash stored."
+        }
+      ],
+      "failure_modes": [
+        "Setting NoLMHash prevents future LM hashes but does not remove existing LM hashes — require password resets.",
+        "Some very old legacy authentication tools may expect LM behavior; test critical legacy services."
+      ],
+      "privilege_required": "Administrator / SYSTEM",
+      "functional_impact": "Low (affects only password storage for future changes); operational impact occurs during password reset cadence.",
+      "risk": {
+        "implementation_risk": "AUTO",
+        "impact_level": "Critical",
+        "confidence": 0.95,
+        "verified": true
+      },
+      "priority": {
+        "suggested_priority": "High",
+        "priority_reason": "Eliminates a long-standing weak storage mechanism useful to attackers."
+      },
+      "audit_query_examples": [
+        "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" /v NoLMHash",
+        "Post-change verification: confirm no LM hash present in forensic/ID store (lab/test)"
+      ],
+      "references": [
+        {
+          "title": "Prevent Windows from storing a LAN Manager (LM) hash of the user's password",
+          "cite": ":contentReference[oaicite:0]{index=0}"
+        }
+      ],
+      "implementation_notes": "After setting NoLMHash, schedule and track password resets for privileged accounts and service accounts. Monitor for applications that rely on legacy hashes.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "AUTH-02",
+      "name": "Enforce NTLMv2 only (LmCompatibilityLevel = 5)",
+      "category": "AUTHENTICATION",
+      "description": "Require NTLMv2 and refuse LM/NTLMv1 to harden authentication protocol negotiation.",
+      "rationale": "NTLMv1 and LM are weak; setting LmCompatibilityLevel to 5 ensures clients send NTLMv2 responses only and servers refuse LM/NTLMv1.",
+      "os_applicability": [
+        { "os_name": "Windows (domain-joined clients & servers)", "supported": true, "notes": "Domain controllers and domain-level compatibility must be aligned; test legacy systems." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Registry (client/system)",
+          "commands": [
+            "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" /v LmCompatibilityLevel /t REG_DWORD /d 5 /f"
+          ],
+          "notes": "Value 5 = Send NTLMv2 response only. Can also be configured via Group Policy: Computer Configuration → Windows Settings → Security Settings → Local Policies → Security Options → 'Network security: LAN Manager authentication level'."
+        },
+        {
+          "type": "Group Policy (recommended for domain)",
+          "description": "Deploy via GPO to ensure consistent domain-wide policy; align domain controllers and legacy systems before enforcing."
+        }
+      ],
+      "validation_checks": [
+        {
+          "type": "Registry check",
+          "command": "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" /v LmCompatibilityLevel",
+          "success_criteria": "Value exists and equals 0x5 (REG_DWORD)."
+        },
+        {
+          "type": "Behavioral test",
+          "command": "Use network authentication test tools or test clients to confirm server accepts only NTLMv2; review security event logs for NTLM fallback/denied events.",
+          "success_criteria": "Authentication attempts use NTLMv2 and legacy LM/NTLMv1 attempts are refused or fail."
+        }
+      ],
+      "failure_modes": [
+        "Legacy devices/applications that only support NTLMv1 will fail to authenticate — inventory & vendor testing required.",
+        "Misaligned domain controller settings can cause authentication issues for legacy accounts."
+      ],
+      "privilege_required": "Administrator / Group Policy admin",
+      "functional_impact": "Medium — may break legacy authentication for unsupported systems.",
+      "risk": {
+        "implementation_risk": "MANUAL_REVIEW",
+        "impact_level": "High",
+        "confidence": 0.9,
+        "verified": true
+      },
+      "priority": {
+        "suggested_priority": "High",
+        "priority_reason": "Prevents downgrade attacks and use of weak authentication; aligns with Microsoft hardening guidance."
+      },
+      "audit_query_examples": [
+        "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" /v LmCompatibilityLevel",
+        "Check security logs and test authentication from representative legacy and current clients"
+      ],
+      "references": [
+        {
+          "title": "Network security: LAN Manager authentication level (explain values and guidance)",
+          "cite": ":contentReference[oaicite:1]{index=1}"
+        },
+        {
+          "title": "Active Directory hardening guidance: Disabling NTLMv1",
+          "cite": ":contentReference[oaicite:2]{index=2}"
+        }
+      ],
+      "implementation_notes": "Run phased rollout: inventory NTLM usage, pilot on non-critical hosts, then enforce in waves. Provide exception handling for legacy systems or isolate them on a management VLAN.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "AUTH-03",
+      "name": "UAC hardening (EnableLUA and related policies)",
+      "category": "AUTHENTICATION",
+      "description": "Ensure User Account Control (UAC) is enabled and configured to require consent/elevation for administrative actions.",
+      "rationale": "UAC limits silent elevation and reduces the attack surface for privilege escalation by requiring explicit consent for administrative operations.",
+      "os_applicability": [
+        { "os_name": "Windows Vista and later", "supported": true, "notes": "Settings and registry paths vary slightly by OS; default recommended is EnableLUA = 1." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Registry / Unattend (machine-level)",
+          "commands": [
+            "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v EnableLUA /t REG_DWORD /d 1 /f"
+          ],
+          "notes": "EnableLUA = 1 turns on UAC. Additional related settings (ConsentPromptBehaviorAdmin, PromptOnSecureDesktop) should be configured per baseline."
+        },
+        {
+          "type": "Group Policy (preferred)",
+          "description": "Use Administrative Templates / Security Options to configure UAC policies centrally."
+        }
+      ],
+      "validation_checks": [
+        {
+          "type": "Registry check",
+          "command": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v EnableLUA",
+          "success_criteria": "EnableLUA exists and equals 0x1 (REG_DWORD)."
+        },
+        {
+          "type": "Functional test",
+          "command": "Perform a privileged operation (installer or registry change) and verify the UAC consent prompt appears as configured.",
+          "success_criteria": "UAC prompt behavior matches baseline (consent/elevation required)."
+        }
+      ],
+      "failure_modes": [
+        "Disabling UAC (EnableLUA=0) reduces security significantly; some legacy applications may require it off — prefer application remediation over turning UAC off.",
+        "Some privileged service behaviours differ under UAC; test service accounts and installers."
+      ],
+      "privilege_required": "Administrator / Group Policy admin",
+      "functional_impact": "Low to Medium depending on configured prompt behavior.",
+      "risk": {
+        "implementation_risk": "AUTO",
+        "impact_level": "High",
+        "confidence": 0.95,
+        "verified": true
+      },
+      "priority": {
+        "suggested_priority": "High",
+        "priority_reason": "Core OS security control; enabling UAC is a baseline requirement."
+      },
+      "audit_query_examples": [
+        "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v EnableLUA",
+        "Test elevation prompts or use gpresult to validate applied GPO settings"
+      ],
+      "references": [
+        {
+          "title": "EnableLUA — Microsoft documentation (UAC / unattend reference)",
+          "cite": ":contentReference[oaicite:3]{index=3}"
+        }
+      ],
+      "implementation_notes": "Configure UAC in Audit/Pilot first if many legacy apps exist; also set related consent/prompt policies to fit operational needs. Reboot may be required for changes to take full effect.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "AUTH-04",
+      "name": "Restrict cached logons (CachedLogonsCount)",
+      "category": "AUTHENTICATION",
+      "description": "Limit or disable cached domain logons to mitigate risk of offline credential use on lost or stolen endpoints.",
+      "rationale": "Reducing the number of cached logons limits the pool of locally-stored credential material available for offline attacks; in high-risk scenarios set to 0 to disable caching.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later (clients & servers)", "supported": true, "notes": "Mobile and laptop users are impacted; plan exceptions for known offline usage." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Registry (machine-level)",
+          "commands": [
+            "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v CachedLogonsCount /t REG_SZ /d 0 /f"
+          ],
+          "notes": "Set CachedLogonsCount to a string value between '0' and '50'. '0' disables caching for new logons; existing cached credentials are unaffected until removed."
+        },
+        {
+          "type": "Group Policy / Azure Policy / MDM",
+          "description": "Enforce via policy (e.g., Azure Guest Configuration or GPO) and document exceptions for laptop/mobile profiles."
+        }
+      ],
+      "validation_checks": [
+        {
+          "type": "Registry check",
+          "command": "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v CachedLogonsCount",
+          "success_criteria": "Value exists and equals the configured limit (e.g., '0')."
+        },
+        {
+          "type": "Functional test",
+          "command": "Simulate domain controller unavailability and attempt local logon with a cached account to confirm behavior.",
+          "success_criteria": "Offline logon fails if cached logons disabled; if set to N, only N unique users may log on offline."
+        }
+      ],
+      "failure_modes": [
+        "Setting to 0 prevents mobile users from logging on offline — may block legitimate use cases; coordinate with asset owners.",
+        "Existing cached credentials are not removed by changing the value; additional steps required to clear caches on devices in-scope."
+      ],
+      "privilege_required": "Administrator / Group Policy admin",
+      "functional_impact": "High for mobile/laptop users; medium for static desktops.",
+      "risk": {
+        "implementation_risk": "MANUAL",
+        "impact_level": "High",
+        "confidence": 0.9,
+        "verified": true
+      },
+      "priority": {
+        "suggested_priority": "Medium (High for high-risk endpoints)",
+        "priority_reason": "Reduces offline credential exposure but operational impact on remote users must be managed."
+      },
+      "audit_query_examples": [
+        "reg query \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v CachedLogonsCount",
+        "Pilot test offline logon behavior on representative laptops"
+      ],
+      "references": [
+        {
+          "title": "Cached domain logon information (CachedLogonsCount) — Microsoft documentation",
+          "cite": ":contentReference[oaicite:4]{index=4}"
+        },
+        {
+          "title": "STIG guidance: limit cached logon credentials on high-value systems",
+          "cite": ":contentReference[oaicite:5]{index=5}"
+        }
+      ],
+      "implementation_notes": "For enterprise rollout: create exception list for known offline users, run a pilot, and document steps to clear existing cached credentials where required. Reboot required for some changes.",
+      "last_validated": "2025-12-30"
+    }
+  ],
+  "source_references_loadbearing": [
+    {
+      "claim": "NoLMHash registry controls LM hash storage",
+      "cite": ":contentReference[oaicite:6]{index=6}"
+    },
+    {
+      "claim": "LmCompatibilityLevel values and recommendation to use '5' for NTLMv2-only",
+      "cite": ":contentReference[oaicite:7]{index=7}"
+    },
+    {
+      "claim": "CachedLogonsCount registry path and semantics",
+      "cite": ":contentReference[oaicite:8]{index=8}"
+    },
+    {
+      "claim": "EnableLUA UAC registry behavior and recommended enabled state",
+      "cite": ":contentReference[oaicite:9]{index=9}"
+    },
+    {
+      "claim": "STIG/CIS guidance enforces cached logon limits and LM/NTLM hardening for high-value systems",
+      "cite": ":contentReference[oaicite:10]{index=10}"
+    }
+  ]
+}

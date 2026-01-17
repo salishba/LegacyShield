@@ -1,0 +1,371 @@
+{
+  "metadata": {
+    "version": "1.0.1",
+    "generated_date": "2025-12-30",
+    "description": "SmartPatch Service Controls — production-grade schema (SVC-01 .. SVC-08). Each control contains enforcement commands, validation checks, failure modes, privileges and authoritative references. Added WinRM/Defender/RDP service controls based on scope and defensive criteria.",
+    "author": "SmartPatch Team (converted)",
+    "source_of_truth": [
+      "Microsoft Docs",
+      "CIS Benchmarks",
+      "CISA / MSRC advisories",
+      "DISA STIG"
+    ]
+  },
+  "controls": [
+    {
+      "control_id": "SVC-01",
+      "name": "Disable Remote Registry service",
+      "category": "SERVICES",
+      "description": "Disable the Remote Registry service so registry cannot be read/modified remotely.",
+      "rationale": "Remote Registry exposes registry over the network and increases lateral information-disclosure and modification surface.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later (clients & servers)", "supported": true, "notes": "Ensure alternate remote management (WinRM/agent) before disabling." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Registry + service stop (recommended)",
+          "commands": [
+            "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\RemoteRegistry\" /v Start /t REG_DWORD /d 4 /f",
+            "sc stop RemoteRegistry"
+          ],
+          "notes": "Start = 4 sets Disabled. Use GPO service security templates for enterprise rollout."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Registry/service check", "command": "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\RemoteRegistry\" /v Start & sc query RemoteRegistry", "success_criteria": "Start = 4 and service state = STOPPED or Disabled" }
+      ],
+      "failure_modes": [
+        "Remote management/monitoring tooling that relies on RemoteRegistry will fail; ensure alternatives (SCCM/WinRM/agent) are available."
+      ],
+      "privilege_required": "Administrator",
+      "functional_impact": "Medium (depends on management tooling)",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "Medium", "confidence": 0.92, "verified": true },
+      "priority": { "suggested_priority": "Medium", "priority_reason": "Removes a remote attack surface; validate management alternatives." },
+      "audit_query_examples": [
+        "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\RemoteRegistry\" /v Start",
+        "sc query RemoteRegistry"
+      ],
+      "references": [
+        { "title": "How to disable Windows Remote Registry? (MS Docs / Q&A)", "cite": ":contentReference[oaicite:0]{index=0}" }
+      ],
+      "implementation_notes": "Pilot on non-critical hosts and confirm remote-management replacement. Deploy via GPO service templates where possible.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-02",
+      "name": "Disable Telnet client and server",
+      "category": "SERVICES",
+      "description": "Remove/disable Telnet server/client to eliminate insecure cleartext remote access.",
+      "rationale": "Telnet transmits credentials in cleartext; modern environments must use SSH or secure management channels.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later", "supported": true, "notes": "TelnetClient is an optional Windows feature; Telnet server may not be installed by default." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Disable feature + stop service",
+          "commands": [
+            "dism /online /Disable-Feature /FeatureName:TelnetClient",
+            "sc config TlntSvr start= disabled & sc stop TlntSvr  (if Telnet Server present)"
+          ],
+          "notes": "Use DISM or Windows Features to remove TelnetClient; disable Telnet server service if present."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Service/feature check", "command": "Get-Service -Name TlntSvr -ErrorAction SilentlyContinue; Get-WindowsOptionalFeature -Online -FeatureName TelnetClient", "success_criteria": "Telnet service absent or Disabled and TelnetClient feature Disabled/NotPresent" }
+      ],
+      "failure_modes": [
+        "Legacy automation or third-party appliances that require Telnet will fail — provide SSH-based alternatives or isolated legacy VLANs."
+      ],
+      "privilege_required": "Administrator",
+      "functional_impact": "Low (recommended to migrate to SSH)",
+      "risk": { "implementation_risk": "AUTO", "impact_level": "Critical", "confidence": 0.95, "verified": true },
+      "priority": { "suggested_priority": "Critical", "priority_reason": "Telnet is insecure and should be removed in all modern environments." },
+      "audit_query_examples": [
+        "Get-Service -Name TlntSvr -ErrorAction SilentlyContinue",
+        "Dism /Online /Get-Features | findstr /I Telnet"
+      ],
+      "references": [
+        { "title": "How to enable/disable Telnet on Windows (feature removal guidance)", "cite": ":contentReference[oaicite:1]{index=1}" }
+      ],
+      "implementation_notes": "Replace automation that uses Telnet with SSH; include exception handling for irreducible legacy systems.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-03",
+      "name": "Disable Print Spooler where not required",
+      "category": "SERVICES",
+      "description": "Stop and disable Print Spooler (Spooler) on systems that do not require printing (especially Domain Controllers).",
+      "rationale": "Print Spooler has been exploited (PrintNightmare) and Microsoft / CISA recommend disabling it on high-risk systems that do not require printing.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later", "supported": true, "notes": "Domain Controllers and critical servers advised to disable Spooler unless printing required." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Service disable + GPO (where applicable)",
+          "commands": [
+            "sc stop Spooler & sc config Spooler start= disabled",
+            "Or use GPO: Computer Configuration → Policies → Windows Settings → Security Settings → System Services → Print Spooler = Disabled"
+          ],
+          "notes": "Stopping Spooler reduces exposure; Microsoft guidance recommends disabling on Domain Controllers and other non-printing servers during elevated risk."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Service check", "command": "Get-Service Spooler; sc query Spooler", "success_criteria": "Service status = Stopped and startup type = Disabled" }
+      ],
+      "failure_modes": [
+        "Print functionality will be lost on affected hosts; ensure business justification documented and alternate printing routes available if needed."
+      ],
+      "privilege_required": "Administrator",
+      "functional_impact": "High on systems that require printing; Low on headless servers.",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "Critical", "confidence": 0.95, "verified": true },
+      "priority": { "suggested_priority": "High for DCs / high-value servers", "priority_reason": "Print Spooler has had critical remote-execution vulnerabilities; disabling reduces attack surface." },
+      "audit_query_examples": [
+        "Get-Service Spooler",
+        "gpresult /h spooler-gpo.html (to verify GPO-managed state)"
+      ],
+      "references": [
+        { "title": "Microsoft guidance on Print Spooler and PrintNightmare (MSRC)", "cite": ":contentReference[oaicite:2]{index=2}" },
+        { "title": "CISA advisory recommending disabling Print Spooler on Domain Controllers", "cite": ":contentReference[oaicite:3]{index=3}" }
+      ],
+      "implementation_notes": "Prioritize Domain Controllers and servers that do not print. Use maintenance windows and pilot groups; document rollback steps to re-enable if needed.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-04",
+      "name": "Harden Windows Update / Windows Update service configuration",
+      "category": "SERVICES",
+      "description": "Ensure Windows Update service and related settings are configured to apply security updates per organizational policy and prevent unauthorized disabling.",
+      "rationale": "Timely application of security updates reduces exposure to known vulnerabilities; Windows Update settings must be consistent and protected from unauthorized change.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later", "supported": true, "notes": "Group Policy and WSUS/Configuration Manager preferred for enterprise control." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Group Policy / WSUS (recommended)",
+          "commands": [
+            "GPO path: Computer Configuration → Administrative Templates → Windows Components → Windows Update → Configure Automatic Updates (set per policy)",
+            "Use WSUS/SCCM/Intune to control update source and scheduling."
+          ],
+          "notes": "Avoid setting NoAutoUpdate unless using centralized update management; prefer forced patching/scheduling and auditability."
+        },
+        {
+          "type": "Registry (standalone)",
+          "commands": [
+            "reg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v NoAutoUpdate /t REG_DWORD /d 0 /f",
+            "reg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v AUOptions /t REG_DWORD /d 4 /f"
+          ],
+          "notes": "AUOptions values control behavior; use documented values for auto-download/install schedule per environment."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Registry/GPO check", "command": "reg query \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" & gpresult /h wu-gpo.html", "success_criteria": "Policy keys reflect intended update configuration and source (WSUS) and NoAutoUpdate not set to disable updates unless intended." },
+        { "type": "Service check", "command": "Get-Service -Name wuauserv", "success_criteria": "Windows Update service present and running per expected policy (may be manual if managed)." }
+      ],
+      "failure_modes": [
+        "Misconfiguration can disable updates or cause surge activity during rollout; ensure phased deployment and bandwidth considerations."
+      ],
+      "privilege_required": "Administrator / Patch admin",
+      "functional_impact": "Low–Medium depending on scheduling",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "Medium", "confidence": 0.95, "verified": true },
+      "priority": { "suggested_priority": "Critical", "priority_reason": "Patch management is the strongest systemic mitigation against known-vulnerability exploitation." },
+      "audit_query_examples": [
+        "reg query \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\"",
+        "Get-Service -Name wuauserv"
+      ],
+      "references": [
+        { "title": "Configure Automatic Updates and Windows Update settings (Microsoft Docs)", "cite": ":contentReference[oaicite:4]{index=4}" }
+      ],
+      "implementation_notes": "Use WSUS/SCCM/Intune for centralized control and reporting. Do not leave systems with NoAutoUpdate=1 unless part of documented exception process.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-05",
+      "name": "Disable unused legacy services (inventory-driven)",
+      "category": "SERVICES",
+      "description": "Identify and disable unused legacy services (e.g., SNMP, TFTP, Simple TCP/IP Services) following inventory and risk assessment.",
+      "rationale": "Unused legacy services increase attack surface; disable them where business functions do not require them.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later (varies by service)", "supported": true, "notes": "Service availability varies by OS and installed roles/features." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Service disable (per-service)",
+          "commands": [
+            "sc config <ServiceName> start= disabled & sc stop <ServiceName>",
+            "Example: sc config SNMP start= disabled & sc stop SNMP"
+          ],
+          "notes": "Use Security Templates / GPO to enforce services state at scale; document exceptions."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Service inventory check", "command": "Get-Service | Where-Object {$_.Status -ne 'Stopped'} | Select Name,DisplayName,Status", "success_criteria": "Target legacy services set to Disabled/Stopped per inventory plan" }
+      ],
+      "failure_modes": [
+        "Disabling services without inventory can break business functions; perform asset owners sign-off and staged rollout."
+      ],
+      "privilege_required": "Administrator",
+      "functional_impact": "Variable (inventory-dependent)",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "Medium", "confidence": 0.9, "verified": true },
+      "priority": { "suggested_priority": "Medium", "priority_reason": "Removes low-value attack surface; must be inventory-driven." },
+      "audit_query_examples": [
+        "Get-Service -Name SNMP, TFTP, SPooler -ErrorAction SilentlyContinue",
+        "Compare service states to inventory baseline"
+      ],
+      "references": [
+        { "title": "Security guidelines for disabling system services (Microsoft Docs)", "cite": ":contentReference[oaicite:5]{index=5}" },
+        { "title": "Configure SNMP Service (MS guidance) — inventory and secure if required", "cite": ":contentReference[oaicite:6]{index=6}" }
+      ],
+      "implementation_notes": "Create an inventory of service dependencies, pilot disable on small groups, and provide rollback/playbook for impacted systems.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-06",
+      "name": "Ensure antimalware service (Microsoft Defender) present and running",
+      "category": "SERVICES",
+      "description": "Ensure antimalware service (WinDefend / MsMpEng) is enabled and running, or that an approved enterprise AV/EDR agent is present and healthy.",
+      "rationale": "Active endpoint protection reduces exploitation, detection and remediation time; absence increases risk of undetected compromise.",
+      "os_applicability": [
+        { "os_name": "Windows 7 (where Defender supported)/Windows 8.1/10/11/Server", "supported": true, "notes": "On platforms where Microsoft Defender not primary, ensure enterprise AV is installed and reporting." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Service check + EDR agent enforcement",
+          "commands": [
+            "Get-Service -Name WinDefend; sc queryex WinDefend",
+            "If absent, deploy approved AV/EDR agent via endpoint management"
+          ],
+          "notes": "Do not run multiple real-time AV engines concurrently unless explicitly supported; follow vendor guidance."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Service/process check", "command": "Get-Service -Name WinDefend; Get-Process -Name MsMpEng -ErrorAction SilentlyContinue", "success_criteria": "Service running and/or EDR agent present and healthy per vendor telemetry" },
+        { "type": "Policy/telemetry check", "command": "Check endpoint management console for healthy agent heartbeat", "success_criteria": "Agent reporting OK to central console" }
+      ],
+      "failure_modes": [
+        "Conflicts between multiple AV engines may cause performance issues; vendor guidance required for coexistence or exclusions.",
+        "High CPU from MsMpEng may require tuning/exclusions for large file servers."
+      ],
+      "privilege_required": "Administrator / Security admin",
+      "functional_impact": "Low–Medium (performance tuning may be needed)",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "High", "confidence": 0.92, "verified": true },
+      "priority": { "suggested_priority": "Critical", "priority_reason": "Endpoint protection is a core prevention/detection control." },
+      "audit_query_examples": [
+        "Get-Service -Name WinDefend; Get-Process -Name MsMpEng -ErrorAction SilentlyContinue",
+        "Verify AV/EDR heartbeat in central management"
+      ],
+      "references": [
+        { "title": "Troubleshoot Microsoft Defender for Endpoint performance and service behavior (MS Docs)", "cite": ":contentReference[oaicite:7]{index=7}" }
+      ],
+      "implementation_notes": "Ensure approved AV/EDR is deployed and reporting before disabling other agents. Tune exclusions for high-throughput servers per vendor guidance.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-07",
+      "name": "Harden WinRM (Windows Remote Management) listeners and authentication",
+      "category": "SERVICES",
+      "description": "Configure WinRM listeners for HTTPS, restrict allowed users, and enforce Kerberos/NTLMv2; disable HTTP listeners where not required.",
+      "rationale": "WinRM provides powerful remote management; insecure configuration (HTTP listener, weak auth) increases risk of credential theft and lateral movement.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later", "supported": true, "notes": "WinRM versions vary; prefer HTTPS listeners and certificate-based authentication for cross-domain or internet-exposed management." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Configure HTTPS listener + firewall",
+          "commands": [
+            "winrm quickconfig -transport:https",
+            "winrm create winrm/config/Listener?Address=*+Transport=HTTPS @{Hostname=\"<fqdn>\";CertificateThumbprint=\"<thumbprint>\"}",
+            "Set-NetFirewallRule -DisplayName 'WinRM HTTPS' -RemoteAddress <trusted-range> -Action Allow"
+          ],
+          "notes": "Use certificate issued by trusted CA for HTTPS listener and restrict remote addresses via firewall. Disable HTTP listener if not needed."
+        },
+        {
+          "type": "Restrict rights",
+          "commands": [
+            "Configure WinRM service ACLs and use Group Policy to limit which users/groups can use WinRM."
+          ],
+          "notes": "Use GPO: Computer Configuration → Administrative Templates → Windows Components → Windows Remote Management."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Listener check", "command": "winrm enumerate winrm/config/Listener", "success_criteria": "Only expected HTTPS listeners present; HTTP listener absent or disabled" },
+        { "type": "Firewall and test", "command": "Test-WSMan -ComputerName <host> -UseSSL", "success_criteria": "Successful connection over HTTPS from trusted management host and failure from untrusted host" }
+      ],
+      "failure_modes": [
+        "Misconfigured certificates or firewall rules can block management; test in lab before mass rollout.",
+        "Legacy management scripts expecting HTTP WinRM may fail and need updating."
+      ],
+      "privilege_required": "Administrator / PKI admin",
+      "functional_impact": "Medium during rollout (management tooling may need updates)",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "High", "confidence": 0.9, "verified": true },
+      "priority": { "suggested_priority": "High", "priority_reason": "Secure remote management reduces credential exposure and lateral movement risk." },
+      "audit_query_examples": [
+        "winrm enumerate winrm/config/Listener",
+        "Test-WSMan -ComputerName <host> -UseSSL"
+      ],
+      "references": [
+        { "title": "WinRM installation and configuration guidance (MS Docs)", "cite": ":contentReference[oaicite:8]{index=8}" },
+        { "title": "Operational guidance for configuring WinRM HTTPS listeners (practical notes)", "cite": ":contentReference[oaicite:9]{index=9}" }
+      ],
+      "implementation_notes": "Deploy certificate infrastructure for HTTPS listeners, restrict RemoteAddress via firewall, and roll out in pilot groups. Provide fall-back console access for management if misconfiguration occurs.",
+      "last_validated": "2025-12-30"
+    },
+
+    {
+      "control_id": "SVC-08",
+      "name": "Disable Remote Desktop Services (TermService) where not required",
+      "category": "SERVICES",
+      "description": "Stop and disable Remote Desktop Services (TermService) on endpoints that do not require Remote Desktop functionality.",
+      "rationale": "Unneeded RDP increases attack surface; where RDP is not required, disabling the service reduces exposure and aligns with network-level controls restricting RDP.",
+      "os_applicability": [
+        { "os_name": "Windows 7 and later", "supported": true, "notes": "Consider application servers and admin hosts where RDP may be needed; coordinate with admin teams." }
+      ],
+      "enforcement_methods": [
+        {
+          "type": "Service disable + GPO",
+          "commands": [
+            "sc stop TermService & sc config TermService start= disabled",
+            "Or use GPO: Computer Configuration → Policies → Administrative Templates → Windows Components → Remote Desktop Services → Do not allow remote connections (or fDenyTSConnections registry)"
+          ],
+          "notes": "Setting fDenyTSConnections = 1 under HKLM\\System\\CurrentControlSet\\Control\\Terminal Server denies new RDP connections; disabling TermService prevents RDS functionality completely."
+        }
+      ],
+      "validation_checks": [
+        { "type": "Service/registry check", "command": "Get-Service TermService -ErrorAction SilentlyContinue; reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\" /v fDenyTSConnections", "success_criteria": "Service stopped/Disabled and fDenyTSConnections = 1 (if deny approach used)" }
+      ],
+      "failure_modes": [
+        "Remote administrators may lose remote console access; ensure VPN/RD Gateway or console access is available as a break-glass.",
+        "Some management tooling may rely on RDP; plan exceptions and documented processes."
+      ],
+      "privilege_required": "Administrator",
+      "functional_impact": "Medium–High (if admins rely on RDP)",
+      "risk": { "implementation_risk": "MANUAL_REVIEW", "impact_level": "High", "confidence": 0.9, "verified": true },
+      "priority": { "suggested_priority": "High for non-admin endpoints", "priority_reason": "Reduces a common external and lateral movement vector." },
+      "audit_query_examples": [
+        "Get-Service TermService -ErrorAction SilentlyContinue",
+        "reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\" /v fDenyTSConnections"
+      ],
+      "references": [
+        { "title": "Disable or secure Remote Desktop Services — Microsoft Docs / GPO guidance", "cite": ":contentReference[oaicite:10]{index=10}" },
+        { "title": "CISA guidance to disable RDP where not required", "cite": ":contentReference[oaicite:11]{index=11}" }
+      ],
+      "implementation_notes": "Prefer network-layer restrictions (allow-list + RD Gateway + MFA) over outright disabling where administrative needs exist; apply conservative pilot rollout.",
+      "last_validated": "2025-12-30"
+    }
+  ],
+  "source_references_loadbearing": [
+    { "claim": "Remote Registry can be disabled via service Start registry and stopped; remote management alternatives recommended.", "cite": ":contentReference[oaicite:12]{index=12}" },
+    { "claim": "Telnet is an optional Windows feature and should be removed; use DISM/Features to disable.", "cite": ":contentReference[oaicite:13]{index=13}" },
+    { "claim": "Print Spooler has been exploited (PrintNightmare); MS/CISA guidance recommend disabling on DCs and non-printing servers.", "cite": ":contentReference[oaicite:14]{index=14}" },
+    { "claim": "Windows Update should be centrally managed (WSUS/SCCM/Intune/GPO) and not disabled inadvertently.", "cite": ":contentReference[oaicite:15]{index=15}" },
+    { "claim": "Security guidance exists for safely disabling system services; inventory and testing required.", "cite": ":contentReference[oaicite:16]{index=16}" },
+    { "claim": "WinRM should be secured with HTTPS listeners and restricted to trusted management hosts.", "cite": ":contentReference[oaicite:17]{index=17}" },
+    { "claim": "Ensure antimalware service is present and healthy; tune per vendor guidance.", "cite": ":contentReference[oaicite:18]{index=18}" },
+    { "claim": "Disable/limit RDP where not needed and prefer RD Gateway/VPN + MFA for remote access.", "cite": ":contentReference[oaicite:19]{index=19}" }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+    "dev_db": "dev_db.sqlite",
+    "runtime_db": "runtime_scan.sqlite",
+    "catalogue_db": "patch_catalogue.sqlite",
+    "catalogues_dir": "catalogues",
+    "msrc_csv": "MSRC_Catalogue.csv",
+    "cve_kb_map": "cve_kb_map.json",
+    "mitigation_files": [
+        "application.json",
+        "network.json",
+        "authorization.json",
+        "services.json",
+        "registry.json"
+    ],
+    "enable_patch_collection": false,
+    "patch_collector_db": "mitigations_catalogue.sqlite"
+}
