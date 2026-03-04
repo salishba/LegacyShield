@@ -41,6 +41,75 @@ MODEL_CONFIG = {
     'default_verification_status': 'unverified'
 }
 
+# ========================================================================
+# FIX 2: SYSTEM ROLE AUTO-DETECTION
+# ========================================================================
+def detect_system_role(system_info: Dict[str, Any], installed_services: Optional[List[str]] = None) -> str:
+    """
+    Auto-detect system role based on OS metadata and installed services.
+    
+    Priority:
+    1. WMI ProductType (if available)
+    2. Installed services heuristic
+    3. Default to workstation
+    
+    Args:
+        system_info: Dictionary with os_info fields (ProductType, etc.)
+        installed_services: List of installed service names
+    
+    Returns:
+        One of: 'domain_controller', 'server', 'database_server', 'web_server', 
+                'file_server', 'workstation', 'laptop'
+    """
+    try:
+        # Method 1: Check WMI ProductType if available
+        # ProductType: 1=workstation, 2=server, 3=domain_controller
+        product_type = system_info.get("ProductType")
+        if product_type is not None:
+            try:
+                pt = int(product_type)
+                if pt == 3:
+                    return "domain_controller"
+                elif pt == 2:
+                    # It's a server; check services for specialization
+                    pass  # Fall through to service heuristic
+                elif pt == 1:
+                    return "workstation"
+            except (ValueError, TypeError):
+                pass
+        
+        # Method 2: Check installed services for specialization
+        if installed_services:
+            services_upper = [s.upper() for s in installed_services]
+            
+            # Check for domain controller indicators
+            if any(svc in services_upper for svc in ["ADDS", "NTDS", "DFSR", "DFS"]):
+                return "domain_controller"
+            
+            # Check for database server
+            if any(svc in services_upper for svc in ["MSSQLSERVER", "MSSQL$", "MYSQL", "POSTGRESQL"]):
+                return "database_server"
+            
+            # Check for web server
+            if any(svc in services_upper for svc in ["W3SVC", "IIS", "HTTPD", "APACHE"]):
+                return "web_server"
+            
+            # Check for file server
+            if any(svc in services_upper for svc in ["LANMANSERVER", "CIFS"]):
+                return "file_server"
+            
+            # If ProductType was 2 (server) but no specialty, generic server
+            if product_type == 2:
+                return "server"
+        
+        # Default fallback
+        return MODEL_CONFIG['default_system_role']
+    
+    except Exception as e:
+        logger.warning(f"Error in system role detection: {e}; defaulting to workstation")
+        return MODEL_CONFIG['default_system_role']
+
+
 
 class HARSEngine:
     """
@@ -226,23 +295,49 @@ class HARSEngine:
             return {'system_role': MODEL_CONFIG['default_system_role']}
     
     def _determine_system_role(self, system_info: Dict[str, Any]) -> str:
-        """Determine system role from system information"""
+        """
+        Determine system role from system information.
+        
+        Enhanced to use ProductType and installed services for accurate detection.
+        Falls back to hostname patterns for compatibility with legacy data.
+        """
+        # FIX 2: Use improved detection function
+        # Try to get installed_services from system_info if available
+        installed_services = system_info.get('installed_services')
+        if isinstance(installed_services, str):
+            try:
+                installed_services = json.loads(installed_services)
+            except:
+                installed_services = None
+        
+        # Call the module-level detection function
+        role = detect_system_role(system_info, installed_services)
+        
+        # If we got anything but the default, return it
+        if role != MODEL_CONFIG['default_system_role']:
+            return role
+        
+        # Fallback: use legacy hostname pattern detection for old systems
         hostname = str(system_info.get('hostname', '')).upper()
+        if hostname:
+            server_patterns = ['SRV', 'SERVER', 'SQL', 'EXCH', 'WEB', 'APP', 'FS']
+            for pattern in server_patterns:
+                if pattern in hostname:
+                    if 'DC' in hostname:
+                        return 'domain_controller'
+                    return 'server'
         
-        # Check for server patterns in hostname
-        server_patterns = ['SRV', 'SERVER', 'DC', 'SQL', 'EXCH', 'WEB', 'APP', 'FS']
-        for pattern in server_patterns:
-            if pattern in hostname:
-                if 'DC' in hostname:
-                    return 'domain_controller'
-                return 'server'
-        
-        # Check domain role
+        # Fallback: check legacy domain_role field
         domain_role = system_info.get('domain_role')
-        if domain_role in [3, 4]:  # Primary or Backup Domain Controller
-            return 'domain_controller'
-        elif domain_role in [2, 5]:  # Member server
-            return 'server'
+        if domain_role:
+            try:
+                dr = int(domain_role)
+                if dr in [3, 4]:  # Primary or Backup Domain Controller
+                    return 'domain_controller'
+                elif dr in [2, 5]:  # Member server
+                    return 'server'
+            except (ValueError, TypeError):
+                pass
         
         # Default to workstation
         return 'workstation'

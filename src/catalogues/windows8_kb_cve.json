@@ -1,0 +1,1451 @@
+{
+  "os": {
+    "name": "Windows 8.1",
+    "version": "6.3",
+    "architecture": "x86/x64"
+  },
+  "kbs": [
+    {
+      "kb_id": "KB4496878",
+      "title": "April 2019 Update for Windows 8.1 for x86-based and x64-based Systems (KB4496878)",
+      "release_date": "2019-04-09",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4496878",
+      "supersedes": [],
+      "superseded_by": ["KB4503276"],
+      "cve_ids": [
+        "CVE-2019-XXXX(unspecified)"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-UNSPECIFIED",
+          "description": "Monthly rollup containing multiple small security fixes; KB summary does not enumerate all CVEs. Enrich from MSRC / Security Update Guide for per-CVE details.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4496878" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU from Microsoft Update Catalog or via Windows Update." }],
+      "notes": "Monthly rollup. Per-CVE list not enumerated in the KB summary — enrich from MSRC / NVD for production use."
+    },
+
+    {
+      "kb_id": "KB4503276",
+      "title": "2019-06 Security Monthly Quality Rollup for Windows 8.1 (KB4503276)",
+      "release_date": "2019-06-11",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4503276",
+      "supersedes": ["KB4496878"],
+      "superseded_by": ["KB4507448"],
+      "cve_ids": [
+        "CVE-2019-0620","CVE-2019-0722","CVE-2019-0888","CVE-2019-0904","CVE-2019-0905",
+        "CVE-2019-0906","CVE-2019-0907","CVE-2019-0908","CVE-2019-0909","CVE-2019-0920",
+        "CVE-2019-0941","CVE-2019-0943","CVE-2019-0948","CVE-2019-0972","CVE-2019-0973",
+        "CVE-2019-0974","CVE-2019-0984","CVE-2019-0986","CVE-2019-0988","CVE-2019-1005",
+        "CVE-2019-1010","CVE-2019-1012","CVE-2019-1025","CVE-2019-1028","CVE-2019-1038",
+        "CVE-2019-1043","CVE-2019-1045","CVE-2019-1046","CVE-2019-1053","CVE-2019-1055",
+        "CVE-2019-1080","CVE-2019-1081"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-0620",
+          "description": "Windows Hyper-V fails to properly validate certain inputs from a guest; may allow code execution on the host from a guest VM.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "adjacent",
+          "exploit_known": false,
+          "affected_components": ["Hyper-V"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2019-0888",
+          "description": "ActiveX Data Objects (ADO) memory handling issue allowing remote code execution via crafted input.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["ADO"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2019-0904",
+          "description": "Jet Database Engine memory-handling vulnerability leading to possible remote code execution when parsing malicious database files.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Jet Database Engine"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2019-0920",
+          "description": "Scripting engine memory corruption in Microsoft browsers leading to potential RCE via crafted web content.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Scripting Engine / Internet Explorer"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["Hyper-V","ADO","Jet Database Engine","Scripting Engine","IIS","GDI","Windows Installer"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4503276" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup via MSU/Windows Update. For Hyper-V hosts consider isolating untrusted guests until patched." }],
+      "notes": "Monthly rollup — contains many fixes. Kernel-level CVEs were intentionally removed from `cve_details` to match your mitigation scope. See Microsoft KB for full per-CVE list. :contentReference[oaicite:3]{index=3}"
+    },
+
+    {
+      "kb_id": "KB4503290",
+      "title": "2019-06 Security-Only Quality Update for Windows 8.1 (KB4503290)",
+      "release_date": "2019-06-11",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4503290",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [
+        "CVE-2019-0620","CVE-2019-0888","CVE-2019-0904","CVE-2019-0920","CVE-2019-0941"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-0620",
+          "description": "Hyper-V host input validation issue allowing code execution from guest; security-only package contains the same fix as monthly rollup.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "adjacent",
+          "exploit_known": false,
+          "affected_components": ["Hyper-V"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2019-0941",
+          "description": "IIS request filtering mis-handling that may lead to Denial of Service in some configurations.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["IIS"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Hyper-V","ADO","Jet Database Engine","IIS"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4503290" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU from Microsoft Update Catalog; useful for minimal-security-only environments." }],
+      "notes": "Security-only package — contains the security fixes without the non-security quality changes. :contentReference[oaicite:4]{index=4}"
+    },
+
+    {
+      "kb_id": "KB4507448",
+      "title": "2019-07 Security Monthly Quality Rollup for Windows 8.1 (KB4507448)",
+      "release_date": "2019-07-09",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4507448",
+      "supersedes": ["KB4503276"],
+      "superseded_by": ["KB4512488"],
+      "cve_ids": [
+        "CVE-2019-0720","CVE-2019-0736","CVE-2019-1057","CVE-2019-1144","CVE-2019-1145","CVE-2019-1146"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-0720",
+          "description": "Hyper-V host input validation vulnerability fixed in July rollup — may allow host code execution from guest VM.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "adjacent",
+          "exploit_known": false,
+          "affected_components": ["Hyper-V"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2019-1144",
+          "description": "Remote code execution in a non-kernel Windows component due to improper memory handling; fixed in this rollup.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows components (non-kernel)"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Hyper-V","Windows components (non-kernel)"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4507448" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU or use Windows Update. Ensure latest SSU before installing." }],
+      "notes": "Rollup supersedes previous monthly rollups. Kernel CVEs omitted per your constraint. :contentReference[oaicite:5]{index=5}"
+    },
+
+    {
+      "kb_id": "KB4507457",
+      "title": "2019-07 Security-Only Update for Windows 8.1 (KB4507457)",
+      "release_date": "2019-07-09",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4507457",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2019-0720","CVE-2019-1125"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-1125",
+          "description": "Information disclosure / speculative execution related mitigation (Spectre/MDS family); OS-level mitigations applied.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Speculative execution mitigations / OS"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Speculative execution mitigations","Hyper-V"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4507457" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU and apply vendor microcode updates if recommended." }],
+      "notes": "Security-only variant — contains security fixes only (no non-security quality updates)."
+    },
+
+    {
+      "kb_id": "KB4512488",
+      "title": "2019-08 Security Monthly Quality Rollup for Windows 8.1 / Server 2012 R2 (KB4512488)",
+      "release_date": "2019-08-13",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4512488",
+      "supersedes": ["KB4507448"],
+      "superseded_by": ["KB4516067"],
+      "cve_ids": [
+        "CVE-2019-1144","CVE-2019-1145","CVE-2019-1146","CVE-2019-1159","CVE-2019-1162"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-1145",
+          "description": "Non-kernel Windows remote code execution vulnerability fixed in August rollup.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows components (non-kernel)"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2019-1159",
+          "description": "Elevation-of-privilege in a Windows component (non-kernel) — local vector; fixed by update.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Windows service / component"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Windows components (non-kernel)"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4512488" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU from Catalog or via Windows Update." }],
+      "notes": "Large August 2019 rollup; kernel CVEs omitted per your constraint. :contentReference[oaicite:6]{index=6}"
+    },
+
+    {
+      "kb_id": "KB4512489",
+      "title": "2019-08 Security-Only Update for Windows 8.1 (KB4512489)",
+      "release_date": "2019-08-13",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4512489",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2019-1144","CVE-2019-1145","CVE-2019-1146"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-1144",
+          "description": "Non-kernel Windows remote code execution vulnerability fixed in the security-only package.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows components (non-kernel)"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Windows components (non-kernel)"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4512489" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU from Microsoft Update Catalog." }],
+      "notes": "Security-only variant of August fixes. Kernel CVEs omitted."
+    },
+
+    {
+      "kb_id": "KB4516064",
+      "title": "2019-09 Security-Only Quality Update for Windows 8.1 (KB4516064)",
+      "release_date": "2019-09-10",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4516064",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2018-12126","CVE-2018-12127","CVE-2018-12130","CVE-2019-11091"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2018-12126",
+          "description": "Microarchitectural Store Buffer Data Sampling (MSBDS) — speculative execution side-channel; OS mitigations applied.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Speculative execution mitigations / OS"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Speculative execution mitigations / OS"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4516064" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU; follow CPU vendor microcode guidance/practices where applicable." }],
+      "notes": "MDS / microarchitectural mitigations (OS-level). These are low-level mitigations that may also require CPU microcode updates; not kernel reverse-engineering but still low-level. :contentReference[oaicite:7]{index=7}"
+    },
+
+    {
+      "kb_id": "KB4519990",
+      "title": "2019-10 Security-Only Quality Update for Windows 8.1 (KB4519990)",
+      "release_date": "2019-10-08",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4519990",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4519990" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU from Microsoft Update Catalog. Expand CVE list from Security Update Guide for full per-CVE detail." }],
+      "notes": "KB references MS Security Update Guide for the authoritative CVE table; I can expand these if you want every CVE enumerated."
+    },
+
+    {
+      "kb_id": "KB4520005",
+      "title": "2019-10 Monthly Rollup for Windows 8.1 (KB4520005)",
+      "release_date": "2019-10-08",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4520005",
+      "supersedes": [],
+      "superseded_by": ["KB4524156"],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4520005" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup from Microsoft Update Catalog." }],
+      "notes": "Monthly rollup — per-CVE table available in Security Update Guide; expand on request."
+    },
+
+    {
+      "kb_id": "KB4524156",
+      "title": "2019-10 Monthly Rollup for Windows 8.1 (KB4524156)",
+      "release_date": "2019-10-03",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4524156",
+      "supersedes": ["KB4520005"],
+      "superseded_by": ["KB4525243"],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4524156" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Apply monthly rollup MSU from Catalog/Windows Update." }],
+      "notes": "Monthly rollup — per-CVE table available in Security Update Guide; expand on request."
+    },
+
+    {
+      "kb_id": "KB4524104",
+      "title": ".NET Framework Security and Quality Rollup (October 2019) for Windows 8.1 (KB4524104)",
+      "release_date": "2019-10-08",
+      "type": ".net_framework_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4524104",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": ["Microsoft .NET Framework 3.5.1","Microsoft .NET Framework 4.x"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4524104" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install .NET rollup MSU; check per-framework KBs linked from the article for file-level details." }],
+      "notes": "Rollup covers multiple .NET Framework CVEs — I can expand these per-framework on request."
+    },
+
+    {
+      "kb_id": "KB4525243",
+      "title": "2019-11 Security Monthly Quality Rollup for Windows 8.1 (KB4525243)",
+      "release_date": "2019-11-12",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4525243",
+      "supersedes": ["KB4524156"],
+      "superseded_by": [],
+      "cve_ids": [
+        "CVE-2019-0712","CVE-2019-0719","CVE-2019-1380","CVE-2019-1381","CVE-2019-1382","CVE-2019-1384",
+        "CVE-2019-1388","CVE-2019-1389","CVE-2019-1390","CVE-2019-1406","CVE-2019-1411","CVE-2019-1412","CVE-2019-1419"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-0719",
+          "description": "Hyper-V Network Switch remote code execution vulnerability addressed in November rollup.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "adjacent",
+          "exploit_known": false,
+          "affected_components": ["Hyper-V Network Switch"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2019-1380",
+          "description": "Local elevation-of-privilege in Print Spooler (splwow64.exe); patched in the rollup.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Print Spooler / splwow64.exe"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2019-1406",
+          "description": "Jet Database Engine remote code execution via crafted database files; patched in this rollup.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Jet Database Engine"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["Hyper-V Network Switch","Print Spooler","Jet Database Engine","DirectWrite","ATMFD"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4525243" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU from Microsoft Update Catalog." }],
+      "notes": "Kernel-level CVEs that appear in the full rollup (e.g., CVE-2019-11135) were intentionally excluded from `cve_details`. Enrich CVSS and exploit data from NVD/MSRC if you require accurate scoring."
+    },
+
+    {
+      "kb_id": "KB4525250",
+      "title": "2019-11 Security-Only Update for Windows 8.1 (KB4525250)",
+      "release_date": "2019-11-12",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4525250",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["Same as KB4525243 (filtered)"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2019-0719",
+          "description": "Hyper-V Network Switch RCE same as monthly rollup; found in the security-only package.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "adjacent",
+          "exploit_known": false,
+          "affected_components": ["Hyper-V Network Switch"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Hyper-V Network Switch","Jet Database Engine"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4525250" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU from Microsoft Update Catalog." }],
+      "notes": "Security-only variant of the November monthly rollup; kernel CVEs excluded from `cve_details`."
+    },
+    {
+      "kb_id": "KB5000848",
+      "title": "March 9, 2021 — Monthly Rollup for Windows 8.1 (KB5000848)",
+      "release_date": "2021-03-09",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5000848",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2021-UNSPEC",
+          "description": "Monthly security rollup containing multiple fixes across Windows components; KB summary refers to Security Update Guide for per-CVE details.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5000848" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup via MSU/Windows Update." }],
+      "notes": "Per-CVE table is available in Microsoft's Security Update Guide; enrich for production use."
+    },
+
+    {
+      "kb_id": "KB5003671",
+      "title": "June 8, 2021 — Monthly Rollup for Windows 8.1 (KB5003671)",
+      "release_date": "2021-06-08",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5003671",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2021-UNSPEC",
+          "description": "June monthly rollup covering a broad set of Windows components (App Platform, Cloud Infrastructure, Authentication, Scripting Engine, etc.). See Security Update Guide for per-CVE mapping.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Scripting Engine","Windows App Platform","Authentication subsystems"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Scripting Engine","Windows App Platform","Authentication subsystems"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5003671" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU from Microsoft Update Catalog." }],
+      "notes": "Monthly rollup — expand per-CVE via Security Update Guide / NVD for scoring."
+    },
+
+    {
+      "kb_id": "KB5004958",
+      "title": "July 6, 2021 — Security-Only Update (Out-of-band) for Windows 8.1 (KB5004958)",
+      "release_date": "2021-07-06",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5004958",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2021-34527"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2021-34527",
+          "description": "Windows Print Spooler improperly performs privileged file operations — remote code execution (PrintNightmare). An attacker could run arbitrary code as SYSTEM via crafted print requests or printer driver operations.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": true,
+          "affected_components": ["Print Spooler (spoolsv.exe, splwow64.exe)"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Print Spooler"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5004958" }, { "method": "service_check", "value": "spooler_running" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU; if patching not possible, disable Print Spooler service or restrict printer driver installation until patched." }],
+      "notes": "Out-of-band emergency update addressing PrintNightmare (actively exploited)."
+    },
+
+    {
+      "kb_id": "KB5005627",
+      "title": "September 14, 2021 — Security-Only Update for Windows 8.1 (KB5005627)",
+      "release_date": "2021-09-14",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5005627",
+      "supersedes": [],
+      "superseded_by": ["KB5005613"],
+      "cve_ids": [
+        "CVE-2021-26435","CVE-2021-36955","CVE-2021-36958","CVE-2021-36959","CVE-2021-36960",
+        "CVE-2021-36961","CVE-2021-36962","CVE-2021-36963","CVE-2021-36964","CVE-2021-36965",
+        "CVE-2021-36969","CVE-2021-36972","CVE-2021-36974","CVE-2021-38624","CVE-2021-38628",
+        "CVE-2021-38629","CVE-2021-38630","CVE-2021-38633","CVE-2021-38635","CVE-2021-38636",
+        "CVE-2021-38638","CVE-2021-38639","CVE-2021-38667","CVE-2021-38671","CVE-2021-40444","CVE-2021-40447"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2021-36958",
+          "description": "Windows Print Spooler remote code execution vulnerability (another PrintNightmare-related fix) — allows remote attackers to execute code via the spooler service.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": true,
+          "affected_components": ["Print Spooler"],
+          "mitigation_type": "os_update"
+        },
+        {
+          "cve_id": "CVE-2021-40444",
+          "description": "MSHTML platform remote code execution: malicious Office documents or specially crafted web content can trigger remote code execution via MSHTML/IE rendering.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": true,
+          "affected_components": ["MSHTML / mshtml.dll", "Internet Explorer rendering engine"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2021-36965",
+          "description": "Windows remote code execution vulnerability allowing unauthorized commands; KB summary indicates remote exploitation potential.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows components (application-level)"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Print Spooler","MSHTML","Windows services"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5005627" }, { "method": "file_version_check", "value": "mshtml.dll" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU; apply Office/Browser hardening workarounds if patch cannot be immediately applied." }],
+      "notes": "Includes MSHTML/Print Spooler fixes and many application-level CVEs; kernel-level CVEs excluded."
+    },
+
+    {
+      "kb_id": "KB5005613",
+      "title": "September 14, 2021 — Monthly Rollup for Windows 8.1 (KB5005613)",
+      "release_date": "2021-09-14",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5005613",
+      "supersedes": ["KB5005627"],
+      "superseded_by": [],
+      "cve_ids": ["Same-as-KB5005627-filtered"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2021-40444",
+          "description": "MSHTML remote code execution fixed in the September monthly rollup as well.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": true,
+          "affected_components": ["MSHTML / mshtml.dll"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["MSHTML","Print Spooler"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5005613" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU from Microsoft Update Catalog." }],
+      "notes": "Monthly rollup includes security-only fixes plus quality updates; supersedes the security-only where applicable."
+    },
+
+    {
+      "kb_id": "KB5008285",
+      "title": "December 14, 2021 — Security Update for Windows Media Center (KB5008285)",
+      "release_date": "2021-12-14",
+      "type": "security_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5008285",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [
+        "CVE-2021-40441","CVE-2021-41333","CVE-2021-43207","CVE-2021-43215","CVE-2021-43216",
+        "CVE-2021-43217","CVE-2021-43222","CVE-2021-43223","CVE-2021-43224","CVE-2021-43226",
+        "CVE-2021-43229","CVE-2021-43230","CVE-2021-43232","CVE-2021-43233","CVE-2021-43234",
+        "CVE-2021-43236","CVE-2021-43238","CVE-2021-43245","CVE-2021-43248","CVE-2021-43883","CVE-2021-43893"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2021-40441",
+          "description": "Windows Media Center elevation of privilege vulnerability in Media Center components; local attacker could gain additional privileges.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Windows Media Center"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2021-43207",
+          "description": "Windows Media Center elevation of privilege vulnerability; fixed in this security update.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Windows Media Center"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["Windows Media Center"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5008285" }, { "method": "file_version_check", "value": "ehome.exe" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install KB MSU; consider disabling Media Center components on hosts that don’t need them." }],
+      "notes": "Many Media Center elevation-of-privilege CVEs patched; these are application-level and within mitigation scope."
+    },
+
+    {
+      "kb_id": "KB5009624",
+      "title": "January 11, 2022 — Monthly Rollup for Windows 8.1 (KB5009624)",
+      "release_date": "2022-01-11",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5009624",
+      "supersedes": ["KB5008285","KB5005613"],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-UNSPEC",
+          "description": "January 2022 monthly rollup; contains fixes that were part of KB5008263 (Dec 14, 2021) and other improvements. Use Security Update Guide to enumerate CVEs.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5009624" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU." }],
+      "notes": "Rollup; expand per-CVE mapping from Security Update Guide for full dataset."
+    },
+
+    {
+      "kb_id": "KB5011560",
+      "title": "March 8, 2022 — Security Update (Windows Media Center and related) (KB5011560)",
+      "release_date": "2022-03-08",
+      "type": "security_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5011560",
+      "supersedes": [],
+      "superseded_by": ["KB5011564"],
+      "cve_ids": [
+        "CVE-2022-21973","CVE-2022-21975","CVE-2022-21977","CVE-2022-21990","CVE-2022-22010",
+        "CVE-2022-23253","CVE-2022-23281","CVE-2022-23283","CVE-2022-23284","CVE-2022-23285",
+        "CVE-2022-23290","CVE-2022-23293","CVE-2022-23294","CVE-2022-23296","CVE-2022-23297",
+        "CVE-2022-23298","CVE-2022-23299","CVE-2022-24454","CVE-2022-24455","CVE-2022-24459",
+        "CVE-2022-24502","CVE-2022-24503"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-21990",
+          "description": "Windows Media Center remote code execution vulnerability allowing bypass of authentication and arbitrary code execution in media handling components.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows Media Center"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2022-23285",
+          "description": "Windows Media Center remote code execution vulnerability requiring crafted input to media components.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows Media Center"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["Windows Media Center"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5011560" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install KB via MSU or Windows Update; disable Media Center where not needed." }],
+      "notes": "Large set of Media Center CVEs and other component fixes. Kernel CVEs excluded."
+    },
+
+    {
+      "kb_id": "KB5011564",
+      "title": "March 8, 2022 — Cumulative Update for Windows 8.1 (KB5011564)",
+      "release_date": "2022-03-08",
+      "type": "cumulative_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5011564",
+      "supersedes": ["KB5011560"],
+      "superseded_by": [],
+      "cve_ids": ["Same-as-KB5011560-filtered"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-21990",
+          "description": "Media Center RCE included in cumulative — same fixes as security-only/cumulative packages.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Windows Media Center"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["Windows Media Center"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5011564" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install cumulative update MSU via Catalog/Windows Update." }],
+      "notes": "Cumulative update includes security-only fixes plus quality updates."
+    },
+
+    {
+      "kb_id": "KB5014001",
+      "title": "May 10, 2022 — Security-Only Update for Windows 8.1 (KB5014001)",
+      "release_date": "2022-05-10",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5014001",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-UNSPEC",
+          "description": "May 2022 security-only update — contains security fixes; expand via Security Update Guide.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5014001" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only MSU from Catalog." }],
+      "notes": "Per-CVE expansion available from Security Update Guide."
+    },
+
+    {
+      "kb_id": "KB5016683",
+      "title": "August 9, 2022 — Patch Tuesday Update for Windows 8.1 (KB5016683)",
+      "release_date": "2022-08-09",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5016683",
+      "supersedes": [],
+      "superseded_by": ["KB5017367"],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-UNSPEC",
+          "description": "August 2022 Patch Tuesday rollup; contains several fixes. See Security Update Guide for full CVE list.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5016683" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU via Catalog." }],
+      "notes": "Rollup — expand per-CVE for scoring."
+    },
+
+    {
+      "kb_id": "KB5017367",
+      "title": "September 13, 2022 — Monthly Rollup for Windows 8.1 (KB5017367)",
+      "release_date": "2022-09-13",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5017367",
+      "supersedes": ["KB5016683"],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-UNSPEC",
+          "description": "September 2022 cumulative update; contains various security fixes. Use Security Update Guide to enumerate non-kernel mitigatable CVEs.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5017367" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU." }],
+      "notes": "Per-CVE expansion recommended."
+    },
+
+    {
+      "kb_id": "KB5020447",
+      "title": "October 17, 2022 — Update for Windows 8.1 (KB5020447)",
+      "release_date": "2022-10-17",
+      "type": "update",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5020447",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-UNSPEC",
+          "description": "October 2022 cumulative update; KB article gives issue list — consult Security Update Guide for CVE mapping.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5020447" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install MSU from Microsoft Update Catalog." }],
+      "notes": "KB page lists issues — Security Update Guide needed to extract CVE table."
+    },
+
+    {
+      "kb_id": "KB5021294",
+      "title": "December 13, 2022 — Patch Tuesday Update for Windows 8.1 (KB5021294)",
+      "release_date": "2022-12-13",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win8_1", "architecture": "x86" }, { "os_id": "win8_1", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5021294",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2022-UNSPEC",
+          "description": "December 2022 rollup — addresses LSASS memory leak on domain controllers among other fixes; expand via Security Update Guide.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["LSASS (for domain controllers)"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["LSASS","Windows services"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5021294" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU; verify domain controller LSASS behavior after patch." }],
+      "notes": "Patch Tuesday rollup — recommend per-CVE enrichment."
+    },
+
+    {
+      "os_group": "embedded",
+      "kb_id": "KB5025288",
+      "title": "April 11, 2023 — Security Update for Windows Embedded 8.1 / Server 2012 R2 (KB5025288)",
+      "release_date": "2023-04-11",
+      "type": "security_update",
+      "os_targets": [{ "os_id": "win_embedded_8_1", "architecture": "x86/x64" }, { "os_id": "server_2012_r2", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5025288",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2023-21554","CVE-2023-28250","CVE-2023-28275"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2023-21554",
+          "description": "Microsoft Message Queuing (MSMQ) remote code execution: specially crafted MSMQ packets may allow remote code execution.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["MSMQ"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2023-28250",
+          "description": "Pragmatic General Multicast (PGM) improperly handles crafted packets: could lead to remote code execution.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["PGM"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["MSMQ","PGM","WDAC OLE DB provider"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5025288" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security update via Microsoft Update Catalog." }],
+      "notes": "Embedded/Server fixes — included here because they affect application-level components that can be mitigated."
+    },
+
+    {
+      "kb_id": "KB5023764",
+      "title": "March 14, 2023 — Security-Only Update for Windows Embedded 8.1 Industry (KB5023764)",
+      "release_date": "2023-03-14",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "win_embedded_8_1", "architecture": "x86/x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5023764",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2023-UNSPEC",
+          "description": "March 2023 security-only update for Embedded 8.1 Industry; consult Security Update Guide for specific CVEs.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5023764" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install security-only update via Microsoft Update Catalog." }],
+      "notes": "Embedded SKU security-only package; expand CVEs on demand."
+    },
+
+    {
+      "kb_id": "KB5031407",
+      "title": "October 10, 2023 — Security-Only Update for Windows Server 2012 R2 (ESU) (KB5031407)",
+      "release_date": "2023-10-10",
+      "type": "security_only_update",
+      "os_targets": [{ "os_id": "server_2012_r2_esu", "architecture": "x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5031407",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2023-UNSPEC",
+          "description": "October 2023 security-only update for ESU customers; refer to Microsoft Security Update Guide for per-CVE table.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5031407" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install ESU security-only MSU as applicable." }],
+      "notes": "ESU patch for Server 2012 R2 — CVE expansion available on request."
+    },
+
+    {
+      "kb_id": "KB5028232",
+      "title": "July 11, 2023 — Monthly Rollup for Windows Embedded 8 Standard (KB5028232)",
+      "release_date": "2023-07-11",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win_embedded_8", "architecture": "x86/x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5028232",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2023-UNSPEC",
+          "description": "July 2023 monthly rollup for Embedded 8 Standard; KB lists security fixes — expand per-CVE via Security Update Guide.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5028232" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install monthly rollup MSU." }],
+      "notes": "Embedded SKU rollup — good to include in inventory for ESU/embedded deployments."
+    },
+
+    {
+      "kb_id": "KB5028228",
+      "title": "July 11, 2023 — Monthly Rollup for Windows Embedded 8.1 Industry (KB5028228)",
+      "release_date": "2023-07-11",
+      "type": "monthly_rollup",
+      "os_targets": [{ "os_id": "win_embedded_8_1", "architecture": "x86/x64" }],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB5028228",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-list-not-specified"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2023-UNSPEC",
+          "description": "July 2023 monthly rollup for Embedded 8.1 Industry; contains security fixes — consult Microsoft Security Update Guide for CVEs.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB5028228" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install MSU from Catalog." }],
+      "notes": "Embedded SKU monthly rollup."
+    },
+    {
+      "kb_id": "KB3013455",
+      "title": "February 10, 2015 — Security Update (KB3013455)",
+      "release_date": "2015-02-10",
+      "type": "security_update",
+      "os_targets": [
+        { "os_id": "win8", "architecture": "x86/x64" },
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3013455",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB3013455" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Install MSU via WUSA/DISM." }],
+      "notes": "All CVEs listed by this KB are kernel-mode driver issues (CVE-2015-0062, -0063, -0064, -0065, -0066, -0084, -0096) and were excluded from `cve_details` per your 'no kernel' constraint."
+    },
+
+    {
+      "kb_id": "KB3023562",
+      "title": "February 10, 2015 — Security Update (KB3023562)",
+      "release_date": "2015-02-10",
+      "type": "security_update",
+      "os_targets": [
+        { "os_id": "win8", "architecture": "x86/x64" },
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3023562",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB3023562" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Install MSU via WUSA/DISM." }],
+      "notes": "CVE-2015-0085 is a kernel-mode driver elevation-of-privilege CVE — excluded from `cve_details` per your kernel exclusion."
+    },
+
+    {
+      "kb_id": "MS15-006",
+      "title": "MS15-006 Security Bulletin (WER elevation of privilege) — (KB not specified)",
+      "release_date": "2015-01-13",
+      "type": "security_bulletin",
+      "os_targets": [
+        { "os_id": "win8", "architecture": "x86/x64" },
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.microsoft.com/security/portal",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2015-0001"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2015-0001",
+          "description": "Windows Error Reporting (WER) may handle/execute files insecurely, enabling elevation of privilege when WER processes crafted input.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Windows Error Reporting (wer.dll / werfault)"],
+          "mitigation_type": "application",
+          "references": []
+        }
+      ],
+      "affected_components": ["Windows Error Reporting"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "MS15-006 (bulletin mapping)" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Apply the vendor bulletin fixes corresponding to MS15-006." }],
+      "notes": "This bulletin maps to WER fixes; includes a non-kernel EoP CVE (CVE-2015-0001) which is included above."
+    },
+
+    {
+      "kb_id": "MS15-052",
+      "title": "MS15-052 Security Bulletin (KB not specified)",
+      "release_date": "2015-05-12",
+      "type": "security_bulletin",
+      "os_targets": [
+        { "os_id": "win8", "architecture": "x86/x64" },
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.microsoft.com/security/portal",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "bulletin_check", "value": "MS15-052" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Apply bulletin fixes from Microsoft." }],
+      "notes": "MS15-052 lists a kernel security feature bypass CVE (CVE-2015-1674) — excluded from `cve_details` per your kernel exclusion."
+    },
+
+    {
+      "kb_id": "MS15-111",
+      "title": "MS15-111 Security Bulletin (KB not specified)",
+      "release_date": "2015-10-13",
+      "type": "security_bulletin",
+      "os_targets": [
+        { "os_id": "win8", "architecture": "x86/x64" },
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.microsoft.com/security/portal",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [],
+      "cve_details": [],
+      "affected_components": [],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "bulletin_check", "value": "MS15-111" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Apply fixes referenced by MS15-111." }],
+      "notes": "MS15-111 primarily lists kernel-level CVEs (CVE-2015-2549, -2550, -2552, -2553, -2554) — excluded from `cve_details` per your kernel constraint."
+    },
+
+    {
+      "kb_id": "KB4471322",
+      "title": "December 11, 2018 — Security-Only Update for Windows 8.1 (KB4471322)",
+      "release_date": "2018-12-11",
+      "type": "security_only_update",
+      "os_targets": [
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4471322",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [
+        "CVE-2018-8517","CVE-2018-8540","CVE-2018-8514","CVE-2018-8595","CVE-2018-8596","CVE-2018-8619","CVE-2018-8622","CVE-2018-8625","CVE-2018-8631","CVE-2018-8639","CVE-2018-8641","CVE-2018-8643","CVE-2018-8477"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2018-8517",
+          "description": ".NET Framework denial of service: specially crafted web requests could cause denial of service in .NET applications.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [".NET Framework"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2018-8540",
+          "description": ".NET Framework remote code execution: input validation issue that could allow remote code execution in some hosted scenarios.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": [".NET Framework"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2018-8625",
+          "description": "VBScript remote code execution vulnerability in Internet Explorer / scripting host.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["VBScript engine","Internet Explorer"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": [".NET Framework","VBScript","Internet Explorer"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4471322" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Install security-only MSU or apply targeted .NET/IE updates." }],
+      "notes": "This KB contains a mix of kernel and non-kernel CVEs. Kernel CVEs (e.g., CVE-2018-8477, CVE-2018-8611, CVE-2018-8641) were omitted from `cve_details` per your restriction; non-kernel CVEs retained above."
+    },
+
+    {
+      "kb_id": "KB4516064",
+      "title": "September 10, 2019 — Security-Only Quality Update for Windows 8.1 (KB4516064)",
+      "release_date": "2019-09-10",
+      "type": "security_only_update",
+      "os_targets": [
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4516064",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2018-12126","CVE-2018-12127","CVE-2018-12130","CVE-2019-11091"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2018-12126",
+          "description": "Microarchitectural Store Buffer Data Sampling (MSBDS) — speculative-execution side-channel; OS-level mitigations applied.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Speculative execution mitigations / OS"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Speculative execution mitigations"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4516064" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Install security-only MSU; also follow CPU vendor microcode guidance." }],
+      "notes": "These CVEs are microarchitectural MDS-class issues; included as 'os_update' mitigations. Kernel-mode CVEs (if any present in the KB) were excluded per your constraint."
+    },
+
+    {
+      "kb_id": "KB4516067",
+      "title": "September 10, 2019 — Monthly Rollup for Windows 8.1 (KB4516067)",
+      "release_date": "2019-09-10",
+      "type": "monthly_rollup",
+      "os_targets": [
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4516067",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": ["CVE-2018-12126","CVE-2018-12127","CVE-2018-12130","CVE-2019-11091"],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2018-12130",
+          "description": "Microarchitectural Load Port Data Sampling (MLPDS) — speculative execution side-channel; OS mitigations included.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Speculative execution mitigations / OS"],
+          "mitigation_type": "os_update"
+        }
+      ],
+      "affected_components": ["Speculative execution mitigations"],
+      "mitigation_type": "os_update",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4516067" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Apply monthly rollup; ensure SSU prerequisites are installed." }],
+      "notes": "Monthly rollup includes MDS mitigations; kernel CVEs in the full rollup were removed from `cve_details` per your exclusion rules."
+    },
+    {
+      "kb_id": "KB4541505",
+      "title": "March 10, 2020 — Security Update (KB4541505)",
+      "release_date": "2020-03-10",
+      "type": "security_update",
+      "os_targets": [
+        { "os_id": "win8", "architecture": "x86/x64" },
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4541505",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [
+        "CVE-2020-0645","CVE-2020-0684","CVE-2020-0768","CVE-2020-0769","CVE-2020-0771",
+        "CVE-2020-0772","CVE-2020-0774","CVE-2020-0777","CVE-2020-0778","CVE-2020-0779",
+        "CVE-2020-0780","CVE-2020-0781","CVE-2020-0783","CVE-2020-0785","CVE-2020-0787",
+        "CVE-2020-0791","CVE-2020-0797","CVE-2020-0799","CVE-2020-0800","CVE-2020-0802",
+        "CVE-2020-0803","CVE-2020-0804","CVE-2020-0806","CVE-2020-0814","CVE-2020-0819",
+        "CVE-2020-0822","CVE-2020-0824","CVE-2020-0830","CVE-2020-0832","CVE-2020-0833",
+        "CVE-2020-0834","CVE-2020-0840","CVE-2020-0842","CVE-2020-0843","CVE-2020-0844",
+        "CVE-2020-0845","CVE-2020-0847","CVE-2020-0849","CVE-2020-0853","CVE-2020-0857",
+        "CVE-2020-0858","CVE-2020-0859","CVE-2020-0861","CVE-2020-0864","CVE-2020-0865",
+        "CVE-2020-0866","CVE-2020-0871","CVE-2020-0874","CVE-2020-0877","CVE-2020-0879",
+        "CVE-2020-0880","CVE-2020-0881","CVE-2020-0882","CVE-2020-0883","CVE-2020-0885",
+        "CVE-2020-0887","CVE-2020-0897"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2020-0645",
+          "description": "IIS request tampering — malformed headers could be used to tamper with requests (tampering / DoS risk depending on configuration).",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["IIS request filtering / request parser"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2020-0684",
+          "description": "Windows LNK processing vulnerability potentially allowing remote code execution when LNK files are processed.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "local / network (if LNK delivered via removable media or network share)",
+          "exploit_known": false,
+          "affected_components": ["Shell link (.LNK) handler"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2020-0768",
+          "description": "Scripting engine memory handling leading to potential remote code execution via crafted web content.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["Scripting Engine / Internet Explorer"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["IIS","Shell LNK handler","Scripting Engine","Windows Installer","UPnP","BITS","GDI","Win32k (excluded)"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4541505" }, { "method": "file_version_check", "value": "mshtml.dll" }],
+      "mitigation_hints": [{ "type": "file_replace", "notes": "Install MSU; apply application hardening (disable scripting/IE/edge legacy features) if patching delayed." }],
+      "notes": "This KB contains a large mix of application and kernel CVEs. Kernel items (Win32k/CVE-2020-0788, CVE-2020-0799, CVE-2020-1114 etc.) were excluded from `cve_details`. Included above: prominent non-kernel CVEs (IIS, LNK, scripting engine)."
+    },
+    {
+      "kb_id": "KB4556853",
+      "title": "May 12, 2020 — Security-Only Update for Windows 8.1 (KB4556853)",
+      "release_date": "2020-05-12",
+      "type": "security_only_update",
+      "os_targets": [
+        { "os_id": "win8_1", "architecture": "x86/x64" }
+      ],
+      "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4556853",
+      "supersedes": [],
+      "superseded_by": [],
+      "cve_ids": [
+        "CVE-2020-0909","CVE-2020-0963","CVE-2020-1010","CVE-2020-1035","CVE-2020-1048",
+        "CVE-2020-1051","CVE-2020-1054","CVE-2020-1058","CVE-2020-1060","CVE-2020-1061",
+        "CVE-2020-1062","CVE-2020-1064","CVE-2020-1067","CVE-2020-1070","CVE-2020-1071",
+        "CVE-2020-1072","CVE-2020-1076","CVE-2020-1078","CVE-2020-1079","CVE-2020-1081",
+        "CVE-2020-1092","CVE-2020-1093","CVE-2020-1108","CVE-2020-1112","CVE-2020-1113",
+        "CVE-2020-1114","CVE-2020-1116","CVE-2020-1136","CVE-2020-1141","CVE-2020-1143",
+        "CVE-2020-1149","CVE-2020-1153","CVE-2020-1154","CVE-2020-1174","CVE-2020-1175",
+        "CVE-2020-1176","CVE-2020-1179"
+      ],
+      "cve_details": [
+        {
+          "cve_id": "CVE-2020-0963",
+          "description": "Windows GDI information disclosure vulnerability affecting user-mode graphics components.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["GDI (user-mode)"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2020-1035",
+          "description": "VBScript remote code execution vulnerability in the VBScript engine / Internet Explorer context.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["VBScript engine","Internet Explorer"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2020-1048",
+          "description": "Print Spooler elevation of privilege due to improper file operations; local attacker could gain elevated rights.",
+          "severity": "important",
+          "cvss_v3": null,
+          "attack_vector": "local",
+          "exploit_known": false,
+          "affected_components": ["Print Spooler"],
+          "mitigation_type": "application"
+        },
+        {
+          "cve_id": "CVE-2020-1064",
+          "description": "MSHTML engine remote code execution: crafted web content or documents may trigger RCE.",
+          "severity": "critical",
+          "cvss_v3": null,
+          "attack_vector": "network",
+          "exploit_known": false,
+          "affected_components": ["MSHTML","Internet Explorer"],
+          "mitigation_type": "application"
+        }
+      ],
+      "affected_components": ["GDI","VBScript","MSHTML","Print Spooler","Jet Database Engine"],
+      "mitigation_type": "application",
+      "detection_hints": [{ "method": "installed_kb_check", "value": "KB4556853" }, { "method": "file_version_check", "value": "mshtml.dll" }],
+      "mitigation_hints": [{ "type": "msu_install", "notes": "Install security-only MSU; consider disabling components (IE/VBScript/Print Spooler) if immediate patching impossible." }],
+      "notes": "Some CVEs in this KB are kernel-level (CVE-2020-1054, CVE-2020-1114, etc.) and were excluded from `cve_details` per your kernel exclusion. The non-kernel CVEs above are included for mitigation."
+    }
+  ]
+}

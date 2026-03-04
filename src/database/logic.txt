@@ -1,3 +1,15 @@
+🔹 Core Flow
+StateChecker → Identify missing CVEs
+Context Engine → Add:
+OS version
+System role
+Network exposure
+Service presence
+Risk Engine → Score CVEs
+Recommendation Engine → Decide action
+Mitigation Engine → Provide fallback if patch unavailable
+
+
 LegacyShield/
 ├── agent/
 ├── catalogue/

@@ -1,0 +1,1170 @@
+{
+  "os": {
+    "name": "Windows 7 SP1/Windows Server 2008 R2 SP1",
+    "version": "7.1/2008 R2 SP1",
+    "architecture": "x86/x64"
+  },
+  "kb": [
+  {
+    "kb_id": "KB4074906",
+    "title": "Update for Microsoft .NET Framework 4.7.1 on Windows 7 SP1 and Windows Server 2008 R2 SP1",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB4074906",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB4074906" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "No public CVEs mapped in source data. Treat as .NET framework security update."
+  },
+  {
+    "kb_id": "KB2756921",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 x86",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x86" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2756921",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB2756921" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "x86-targeted .NET security update; no CVE mapping provided in source data."
+  },
+  {
+    "kb_id": "KB2736422",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 and Windows Server 2008 R2 SP1",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2736422",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB2736422" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "No CVEs found in provided mapping; keep as security update record."
+  },
+  {
+    "kb_id": "KB2789645",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 and Windows Server 2008 R2 SP1",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2789645",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB2789645" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "No CVEs in provided data."
+  },
+  {
+    "kb_id": "KB2742599",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 and Windows Server 2008 R2 SP1 for x64-based Systems",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2742599",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [
+      "CVE-2013-0001",
+      "CVE-2013-0002",
+      "CVE-2013-0003",
+      "CVE-2013-0004"
+    ],
+    "cve_details": [
+      { "cve_id": "CVE-2013-0001", "description": "CVE-2013-0001 — .NET Framework information disclosure (memory/initialization issue)." },
+      { "cve_id": "CVE-2013-0002", "description": "CVE-2013-0002 — .NET Framework elevation of privilege / security bypass." },
+      { "cve_id": "CVE-2013-0003", "description": "CVE-2013-0003 — .NET Framework denial-of-service / code execution vector." },
+      { "cve_id": "CVE-2013-0004", "description": "CVE-2013-0004 — .NET Framework elevation of privilege (double-construction / object handling)." }
+    ],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB2742599" },
+      { "method": "file_version_check", "file": "mscorlib.dll", "operator": "<", "version": null }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Apply KB using .msu / DISM. Verify GAC/assembly versions after install." }
+    ],
+    "notes": "CVE mappings provided by source; file version threshold not available in input, left null for later enrichment."
+  },
+  {
+    "kb_id": "KB3196686",
+    "title": "Preview of Quality Rollup for .NET Framework 3.5.1, 4.5.2, 4.6, 4.6.1 (Nov 2016)",
+    "release_date": null,
+    "type": "preview",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3196686",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3196686" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Preview rollup; use for testing only. Prefer Security-only or latest rollup for production." }
+    ],
+    "notes": "Preview rollup; not primary security rollup."
+  },
+  {
+    "kb_id": "KB3188740",
+    "title": "Security and Quality Rollup for .NET Framework 3.5.1 (Oct 2016)",
+    "release_date": null,
+    "type": "quality_rollup",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3188740",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3188740" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install rollup via Microsoft Update Catalog. Prefer security-only package if available." }
+    ],
+    "notes": "Quality rollup; may supersede older security-only KBs."
+  },
+  {
+    "kb_id": "KB3188730",
+    "title": "Security Only Update for .NET Framework 3.5.1 (Oct 2016)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3188730",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3188730" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install security-only package for .NET." }
+    ],
+    "notes": "Security-only update; preferred for minimal footprint when available."
+  },
+  {
+    "kb_id": "KB2729452",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 and Windows Server 2008 R2 SP1 (x64)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2729452",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [
+      "CVE-2010-3958"
+    ],
+    "cve_details": [
+      { "cve_id": "CVE-2010-3958", "description": "CVE-2010-3958 — High-severity .NET Framework vulnerability (privilege escalation / code execution vector)." }
+    ],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB2729452" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via .msu / DISM" }
+    ],
+    "notes": "CVE mapping provided by source; verify assembly version thresholds if needed."
+  },
+  {
+    "kb_id": "KB3074543",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3074543",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [
+      "CVE-2015-2504",
+      "CVE-2015-2526"
+    ],
+    "cve_details": [
+      { "cve_id": "CVE-2015-2504", "description": "CVE-2015-2504 — .NET Framework elevation of privilege due to insufficient validation during array/object operations." },
+      { "cve_id": "CVE-2015-2526", "description": "CVE-2015-2526 — Denial-of-service / MVC-related performance issue in .NET stack." }
+    ],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3074543" },
+      { "method": "file_version_check", "file": "mscorlib.dll", "operator": "<", "version": null }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Apply KB to update .NET assemblies; validate GAC after install." }
+    ],
+    "notes": "CVE mapping provided; assembly version thresholds should be populated from Microsoft advisory if required."
+  },
+  {
+    "kb_id": "KB3163245",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3163245",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [
+      "CVE-2016-3255"
+    ],
+    "cve_details": [
+      { "cve_id": "CVE-2016-3255", "description": "CVE-2016-3255 — .NET Framework information disclosure (XML parsing / XXE-like behavior)." }
+    ],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3163245" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "CVE mapping provided by source."
+  },
+  {
+    "kb_id": "KB3142024",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 and Windows Server 2008 R2 (KB3142024)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3142024",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3142024" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "No CVEs in provided mapping."
+  },
+  {
+    "kb_id": "KB3142042",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3142042",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3142042" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": "No CVE mapping provided."
+  },
+  {
+    "kb_id": "KB3127229",
+    "title": "Security Update for Microsoft .NET Framework 4.5.2 on Windows Embedded Standard 7 SP1",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win_embedded_7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3127229",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3127229" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": "Embedded-specific package; no CVE mapping supplied."
+  },
+  {
+    "kb_id": "KB3135983",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 and Windows Server 2008 R2",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3135983",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3135983" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": "No CVEs in provided mapping."
+  },
+  {
+    "kb_id": "KB3135988",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 x86",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x86" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3135988",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3135988" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": "x86-targeted package; no CVE mapping provided."
+  },
+  {
+    "kb_id": "KB3122648",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3122648",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3122648" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": "No CVEs in provided mapping."
+  },
+  {
+    "kb_id": "KB3099862",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3099862",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3099862" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB3127220",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 and Windows Server 2008 R2",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3127220",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3127220" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB .msu via Microsoft Update Catalog or DISM" }
+    ],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB3097989",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3097989",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3097989" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB3072305",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3072305",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3072305" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB3023215",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3023215",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3023215" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install KB via Microsoft Update Catalog / DISM" }
+    ],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB3048070",
+    "title": "Security and Quality Rollup for .NET Framework 3.5.1 on Windows 7 SP1 (Oct 2016)",
+    "release_date": null,
+    "type": "quality_rollup",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3048070",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [
+      { "method": "installed_kb_check", "value": "KB3048070" }
+    ],
+    "mitigation_hints": [
+      { "type": "file_replace", "notes": "Install rollup; prefer security-only if production-required." }
+    ],
+    "notes": "Rollup package; may supersede older per-CVE KBs."
+  },
+  {
+    "kb_id": "KB3032655",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB3032655)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3032655",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB3032655" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB3037574",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB3037574)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB3037574",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB3037574" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2978120",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2978120)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2978120",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2978120" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2972100",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2972100)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2972100",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2972100" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2979570",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2979570)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2979570",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2979570" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2968294",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2968294)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2968294",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2968294" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2972211",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2972211)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2972211",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2972211" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2894844",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2894844)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2894844",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2894844" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2973112",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2973112)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2973112",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2973112" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2943357",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2943357)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2943357",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2943357" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2937610",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2937610)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2937610",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2937610" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2898851",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2898851)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2898851",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2898851" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2931356",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2931356)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2931356",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2931356" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2836942",
+    "title": "Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 x86 (KB2836942)",
+    "release_date": null,
+    "type": "update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x86" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2836942",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2836942" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2836943",
+    "title": "Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 x86 (KB2836943)",
+    "release_date": null,
+    "type": "update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x86" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2836943",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2836943" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2901112",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2901112)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2901112",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2901112" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2911501",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2911501)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2911501",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2911501" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2898857",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2898857)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2898857",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2898857" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2863240",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2863240)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2863240",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2863240" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2861698",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2861698)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2861698",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2861698" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2861191",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 x86 (KB2861191)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x86" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2861191",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2861191" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2844286",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2844286)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2844286",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2844286" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2840631",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2840631)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2840631",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2840631" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2833946",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2833946)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2833946",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2833946" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2832414",
+    "title": "Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 x86 (KB2832414)",
+    "release_date": null,
+    "type": "update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x86" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2832414",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2832414" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2804579",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2804579)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2804579",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2804579" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2686831",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 (KB2686831)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2686831",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2686831" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2656373",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 (KB2656373)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2656373",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2656373" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2656411",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 SP1 (KB2656411)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2656411",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2656411" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2633873",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2633873)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2633873",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2633873" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2656356",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2656356)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2656356",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2656356" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2572077",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2572077)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2572077",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2572077" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2539635",
+    "title": "Security Update for Microsoft .NET Framework 3.5.1 on Windows 7 (KB2539635)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2539635",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2539635" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install via MSU/DISM" }],
+    "notes": ""
+  },
+  {
+    "kb_id": "KB2500170",
+    "title": "Security Update for Microsoft Chart Controls for Microsoft .NET Framework 3.5 Service Pack 1 (KB2500170)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [{ "os_id": "win7_sp1", "architecture": "x64" }],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2500170",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["system.web.datavisualization.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2500170" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install KB via MSU/DISM" }],
+    "notes": "Chart controls specific component listed where known."
+  },
+  {
+    "kb_id": "KB2518869",
+    "title": "Security Update for .NET Framework 3.5.1 on Windows 7 and Windows Server 2008 R2 SP1 (KB2518869)",
+    "release_date": null,
+    "type": "security_update",
+    "os_targets": [
+      { "os_id": "win7_sp1", "architecture": "x64" },
+      { "os_id": "win2008r2_sp1", "architecture": "x64" }
+    ],
+    "download_url": "https://www.catalog.update.microsoft.com/Search.aspx?q=KB2518869",
+    "supersedes": [],
+    "superseded_by": [],
+    "cve_ids": [],
+    "cve_details": [],
+    "affected_components": ["mscorlib.dll", "system.dll"],
+    "mitigation_type": "application",
+    "detection_hints": [{ "method": "installed_kb_check", "value": "KB2518869" }],
+    "mitigation_hints": [{ "type": "file_replace", "notes": "Install KB via MSU/DISM" }],
+    "notes": ""
+  }
+]
+}

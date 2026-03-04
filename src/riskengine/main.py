@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 import logging
 
-from risk_engine import run_risk_engine
+from config import run_risk_engine
 
 # -----------------------------------------------------------------------------
 # CONFIGURATION

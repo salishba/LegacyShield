@@ -1,0 +1,639 @@
+"""
+EXECUTION LAYER - INTEGRATION GUIDE & REFERENCE
+
+SmartPatch AI-Assisted Targeted Virtual Patching System
+Execution Layer v1.0
+
+Complete integration of:
+- Decision Layer output consumption
+- Mitigation Catalogue controls (APP, AUTH, NET, REG, SVC)
+- Component mapping (DLL, EXE, service, registry)
+- Test/sandbox validation mode
+- Explainability & reasoning chains
+
+Generated: 2026-03-02
+"""
+
+# ============================================================================
+# EXECUTION LAYER COMPONENTS
+# ============================================================================
+
+## Files Created:
+
+1. **mitigation_catalogue_loader.py** (600+ lines)
+   Purpose: Dynamic control catalogue management
+   Key Classes:
+     - MitigationType enum (application, authentication, network, registry, services)
+     - ControlDefinition dataclass
+     - CatalogueIndex (in-memory indexing)
+     - MitigationCatalogueLoader (load and search
+     
+   Entry Point: MitigationCatalogueLoader.load_all_catalogues()
+   
+   Loads from: src/catalogues/
+     - application.json (APP-01 through APP-04)
+     - authentication.json (AUTH-01 through AUTH-04)
+     - network.json (NET-01 through NET-11)
+     - registry.json (REG-01 through REG-06)
+     - services.json (SVC-01 through SVC-06, if available)
+
+2. **component_mapper.py** (500+ lines)
+   Purpose: Map vulnerabilities to components and controls
+   Key Classes:
+     - ComponentType enum (DLL, EXE, driver, registry, service, feature, etc.)
+     - ComponentInfo dataclass
+     - VulnerabilityComponentMap dataclass
+     - ComponentMapper (core mapping engine)
+   
+   Entry Point: ComponentMapper.map_vulnerability(cve_id, keywords, os_version)
+   
+   Capabilities:
+     - Map CVEs to affected components
+     - Query system inventory for component presence
+     - Determine applicable hardening controls
+     - Estimate remediation effort
+     - Generate step-by-step remediation plan
+
+3. **execution_engine.py** (700+ lines)
+   Purpose: Orchestrate remediation execution
+   Key Classes:
+     - ExecutionMode enum (dry_run, sandbox, staged, production)
+     - ExecutionPhase enum (discovery, planning, validation, deployment, verification, rollback)
+     - RemediationControl dataclass
+     - RemediationStep dataclass
+     - ExecutionPlan dataclass
+     - ExecutionReasoning dataclass
+     - ExecutionEngine (main orchestrator)
+   
+   Entry Points:
+     - ExecutionEngine.generate_remediation_plan(cve_id, decision_output, ...)
+     - ExecutionEngine.execute_plan(plan, mode=ExecutionMode.DRY_RUN, dry_run=True)
+   
+   Capabilities:
+     - Load and index catalogues
+     - Generate remediation plans with reasoning
+     - Execute steps with optional dry-run
+     - Track execution progress
+     - Log decisions to database
+
+4. **test_validator.py** (600+ lines)
+   Purpose: Pre-execution validation and sandbox testing
+   Key Classes:
+     - ValidationLevel enum (critical, warning, info)
+     - ValidationStatus enum (passed, failed, warning, skipped, error)
+     - ValidationCheck dataclass
+     - SystemReadinessCheck dataclass
+     - SandboxTestResult dataclass
+     - ValidationReport dataclass
+     - TestValidator (core validator)
+   
+   Entry Points:
+     - TestValidator.check_system_readiness(system_id, os_version, system_info)
+     - TestValidator.run_sandbox_test(plan_id, cve_id, test_system_id, controls)
+     - TestValidator.validate_rollback_capability(system_id, backup_available, ...)
+     - TestValidator.generate_validation_report(plan_id, cve_id, readiness_checks, sandbox_results)
+   
+   Capabilities:
+     - System readiness assessment
+     - Backup validation
+     - Admin access verification
+     - Sandbox/dry-run testing
+     - Rollback feasibility analysis
+     - Comprehensive validation reports
+
+# ============================================================================
+# COMPLETE WORKFLOW & INTEGRATION
+# ============================================================================
+
+## Full Remediation Workflow:
+
+1. DECISION LAYER OUTPUT
+   Input: CVE, vulnerability analysis from decision_engine.py
+   Output: DecisionOutput with priority, risk score, compliance impact
+   
+2. COMPONENT MAPPING
+   Input: DecisionOutput + CVE details
+   Process:
+     a. Map CVE to affected components (kernel32.dll, srv2.sys, rpcss.exe, etc.)
+     b. Query system inventory for affected systems
+     c. Map components to applicable hardening controls
+   Output: VulnerabilityComponentMap with component list and control IDs
+
+3. CATALOGUE CONTROL SELECTION
+   Input: VulnerabilityComponentMap + Control IDs
+   Process:
+     a. Load mitigation catalogues (5 control types)
+     b. Find controls by ID from catalogue
+     c. Verify OS applicability
+     d. Extract enforcement methods and validation checks
+   Output: List of RemediationControl objects with full procedures
+
+4. EXECUTION PLAN GENERATION
+   Input: Components + Controls + Affected Systems
+   Process:
+     a. Build execution phases (discovery, validation, deployment, verification)
+     b. Generate commands for each control on each system
+     c. Create reasoning/explainability model
+     d. Assign effort estimates
+   Output: ExecutionPlan with all steps and reasoning
+
+5. VALIDATION & TESTING
+   Input: ExecutionPlan
+   Process:
+     a. Check system readiness (admin, backup, network, etc.)
+     b. Verify backup availability and freshness
+     c. Run sandbox test on test system (optional)
+     d. Validate rollback capability
+   Output: ValidationReport with safe-to-deploy recommendation
+
+6. EXECUTION (Dry-Run or Real)
+   Input: ExecutionPlan + ExecutionMode (DRY_RUN, SANDBOX, PRODUCTION)
+   Process:
+     a. Execute phase sequence (discovery → validation → deployment → verification)
+     b. Track execution steps and status
+     c. Log all outputs and errors
+     d. Handle failures and rollback
+   Output: Execution results with status per step
+
+7. AUDIT & LOGGING
+   Input: All execution results
+   Output: Execution logs stored in execution_log.sqlite
+   Audit trail: User, timestamp, action, system, result
+
+# ============================================================================
+# QUICK START - COMPLETE EXAMPLE
+# ============================================================================
+
+```python
+from src.riskengine.decision_engine import DecisionEngine
+from src.services.mitigation_catalogue_loader import MitigationCatalogueLoader
+from src.services.component_mapper import ComponentMapper
+from src.services.execution_engine import ExecutionEngine, ExecutionMode
+from src.services.test_validator import TestValidator
+
+# STEP 1: Get decision from Decision Layer
+decision_engine = DecisionEngine("runtime_scan.sqlite", "dev_db.sqlite")
+decision = decision_engine.make_decision("CVE-2021-1234", r_score=0.85)
+
+print(f"Decision: {decision.priority_level} priority")
+print(f"Risk Score: {decision.risk_score:.1%}")
+print(f"Compliance Violations: {decision.compliance_violations}")
+
+# STEP 2: Create Execution Engine and load catalogues
+exec_engine = ExecutionEngine(
+    catalogue_dir="src/catalogues",
+    dev_db_path="dev_db.sqlite",
+    runtime_db_path="runtime_scan.sqlite"
+)
+exec_engine.load_catalogues()
+
+# STEP 3: Generate remediation plan
+plan = exec_engine.generate_remediation_plan(
+    cve_id="CVE-2021-1234",
+    decision_output=decision.__dict__,
+    vulnerability_components=["SMB", "RCE", "wormable"],
+    affected_os="Windows 10",
+    mode=ExecutionMode.DRY_RUN  # Start with dry-run
+)
+
+print(f"\nRemediation Plan: {plan.plan_id}")
+print(f"  Controls to Apply: {len(plan.controls)}")
+print(f"  Affected Systems: {len(plan.affected_systems)}")
+print(f"  Execution Phases: {len(plan.phases)}")
+
+# Show control details
+for control in plan.controls:
+    print(f"  - {control.catalog_id}: {control.name} ({control.mitigation_type.value})")
+
+# STEP 4: Validate before execution
+validator = TestValidator()
+
+# Check readiness for each affected system
+readiness_checks = {}
+for system_id in plan.affected_systems:
+    readiness = validator.check_system_readiness(
+        system_id=system_id,
+        os_version="Windows 10",
+        system_info={
+            "admin_access": True,
+            "backup_available": True,
+            "backup_age_hours": 12,
+            "network_available": True
+        }
+    )
+    readiness_checks[system_id] = readiness
+    
+    if readiness.ready_for_execution:
+        print(f"✓ {system_id}: Ready for execution")
+    else:
+        print(f"✗ {system_id}: Not ready - address issues first")
+        for check in readiness.checks:
+            if not check.passed:
+                print(f"    - {check.name}: {check.message}")
+
+# Run sandbox test (optional)
+sandbox_results = []
+if len(plan.affected_systems) > 0:
+    # Use first system as test
+    test_result = validator.run_sandbox_test(
+        plan_id=plan.plan_id,
+        cve_id="CVE-2021-1234",
+        test_system_id=f"{plan.affected_systems[0]}-TEST",
+        controls_to_test=[
+            {"name": c.name, "type": c.mitigation_type.value}
+            for c in plan.controls
+        ]
+    )
+    sandbox_results.append(test_result)
+    print(f"\n✓ Sandbox Test: {'PASSED' if test_result.all_validations_passed else 'FAILED'}")
+
+# Generate validation report
+validation_report = validator.generate_validation_report(
+    plan_id=plan.plan_id,
+    cve_id="CVE-2021-1234",
+    readiness_checks=readiness_checks,
+    sandbox_results=sandbox_results
+)
+
+print(f"\nValidation Report:")
+print(f"  Safe to Deploy: {'✓ YES' if validation_report.safe_to_deploy else '✗ NO'}")
+print(f"  Readiness: {validation_report.deployment_readiness_percentage:.0f}%")
+print(f"  Critical Issues: {validation_report.critical_issues}")
+for rec in validation_report.recommended_actions:
+    print(f"  {rec}")
+
+# STEP 5: Execute (dry-run first)
+print(f"\n--- Executing (DRY-RUN MODE) ---")
+dry_run_results = exec_engine.execute_plan(
+    plan=plan,
+    mode=ExecutionMode.DRY_RUN,
+    dry_run=True
+)
+
+print(f"Execution Results:")
+print(f"  Total Steps: {dry_run_results['summary']['total_steps']}")
+print(f"  Completed: {dry_run_results['summary']['completed']}")
+print(f"  Success Rate: {dry_run_results['summary']['success_rate']:.0%}")
+
+# If dry-run successful and validation passed, can proceed to production
+if (dry_run_results['summary']['success_rate'] == 1.0 and 
+    validation_report.safe_to_deploy):
+    print("\n✓ Ready for production deployment")
+    # production_results = exec_engine.execute_plan(plan, mode=ExecutionMode.PRODUCTION, dry_run=False)
+else:
+    print("\n✗ Should not deploy - review validation issues")
+```
+
+# ============================================================================
+# CONTROL TYPES & MITIGATION CATEGORIES
+# ============================================================================
+
+## Mitigation Type Categories (Enum: MitigationType):
+
+1. **APPLICATION** (APP-01 through APP-04)
+   Controls for disabling/hardening applications
+   Examples:
+     - APP-01: Disable Windows PowerShell 2.0
+     - APP-02: Disable Internet Explorer 
+     - APP-03: Application whitelisting
+     - APP-04: Script Execution Policy
+
+2. **AUTHENTICATION** (AUTH-01 through AUTH-04)
+   Controls for hardening authentication mechanisms
+   Examples:
+     - AUTH-01: Disable LM hash storage
+     - AUTH-02: Enable NTLMv2 enforcement
+     - AUTH-03: Restrict NTLM authentication
+     - AUTH-04: Enforce MFA/strong password policy
+
+3. **NETWORK** (NET-01 through NET-11)
+   Controls for disabling/hardening network services
+   Examples:
+     - NET-01: Disable SMBv1 (client & server)
+     - NET-02: Enable SMB encryption
+     - NET-03: Disable NetBIOS over TCP/IP
+     - NET-04: Disable RPC endpoints
+     - NET-05: Firewall rules
+     - NET-06: Port hardening
+     - ... (up to NET-11)
+
+4. **REGISTRY** (REG-01 through REG-06)
+   Registry-based hardening controls
+   Examples:
+     - REG-01: Disable AutoRun/AutoPlay
+     - REG-02: Restrict anonymous enumeration
+     - REG-03: Disable Remote Registry
+     - REG-04: UAC hardening
+     - REG-05: LSA protection
+     - REG-06: LSASS credential guard
+
+5. **SERVICES** (SVC-01 through SVC-06, if available)
+   Service-level controls
+   Examples:
+     - SVC-01: Disable RPC service
+     - SVC-02: Disable Print Spooler
+     - SVC-03: Disable Remote Desktop
+     - SVC-04: Disable WinRM
+     - SVC-05: Disable scheduled tasks
+     - SVC-06: Service principal name hardening
+
+## Component Types (Enum: ComponentType):
+
+- **DLL**: Dynamic library (.dll)
+  Example: kernel32.dll, rpcrt4.dll, ntlm.dll
+  
+- **EXE**: Executable (.exe)
+  Example: powershell.exe, lsass.exe, spoolsv.exe
+  
+- **DRIVER**: System driver (.sys)
+  Example: srv2.sys, ndis.sys
+  
+- **REGISTRY_KEY**: Registry key/value
+  Example: HKLM\System\CurrentControlSet\Control\Lsa
+  
+- **SERVICE**: System/user service
+  Example: RpcSs, LanmanServer, spooler
+  
+- **FEATURE**: Windows optional feature
+  Example: MicrosoftWindowsPowerShellV2Root, SMB1Protocol
+  
+- **CONFIG**: Configuration file
+  Example: Group Policy files, service config
+  
+- **LIBRARY**: Software library/module
+  Example: .NET framework, runtime libraries
+
+# ============================================================================
+# DATABASE & PERSISTENCE
+# ============================================================================
+
+## Databases Created:
+
+1. **execution_log.sqlite** (created by ExecutionEngine)
+   Tables:
+     - execution_plans: Complete remediation plans
+     - execution_steps: Individual execution steps
+     - execution_reasoning: Reasoning chains and explainability
+   
+2. **Reads from:**
+     - dev_db.sqlite (component definitions, vulnerability data)
+     - runtime_scan.sqlite (system inventory, installed components)
+
+## Audit Trail:
+
+All decisions logged with:
+- Timestamp (UTC)
+- User/system performing action
+- Action type (plan_created, execution_started, etc.)
+- Entity ID (CVE, system, etc.)
+- Old values vs new values
+- Result/status
+
+# ============================================================================
+# EXPLAINABILITY & REASONING
+# ============================================================================
+
+Each execution plan includes a detailed reasoning chain showing:
+
+1. **Decision Rationale**
+   - Why CVE flagged as this priority
+   - Components identified and why
+   - Applicable controls and justification
+
+2. **Component Analysis**
+   - Total components affected
+   - Component types breakdown
+   - Affected services and features
+   - Registry keys requiring changes
+
+3. **Control Selection**
+   - Why specific controls were chosen
+   - How controls mitigate vulnerability
+   - Which control type(s) most relevant
+
+4. **Risk Factors Considered**
+   - CVSS/EPSS scores
+   - Number of affected systems
+   - Hardening availability
+   - Patch availability
+   - Business impact
+
+5. **Confidence Score (0.0-1.0)**
+   - Based on: controls available, components identified, hardening path exists
+   - Higher score = more confident in recommendation
+   - Factors into approval workflow
+
+# ============================================================================
+# TEST MODE & DRY-RUN FEATURES
+# ============================================================================
+
+## Execution Modes:
+
+1. **DRY-RUN Mode**
+   - Simulates execution without making changes
+   - Shows what would be executed
+   - Useful for initial validation
+   - No system impact
+
+2. **SANDBOX Mode**
+   - Runs on isolated test system
+   - Creates VM clone or container
+   - Full execution with rollback capability
+   - Tests rollback procedures
+
+3. **STAGED Mode**
+   - Deploys to subset of systems (e.g., 10%)
+   - Monitors for issues
+   - Escalates to full deployment if successful
+   - Risk mitigation for large rollouts
+
+4. **PRODUCTION Mode**
+   - Full deployment to all affected systems
+   - Real-time monitoring
+   - Automatic rollback on critical failures
+
+## Validation Levels:
+
+1. **CRITICAL** (must pass)
+   - Admin access
+   - Backup availability
+   - Network connectivity
+   - OS compatibility
+
+2. **WARNING** (should pass)
+   - Backup currency (< 24 hours)
+   - Antivirus compatibility
+   - Maintenance window availability
+
+3. **INFO** (informational)
+   - Uptime metrics
+   - Service status
+   - Current patch levels
+
+# ============================================================================
+# INTEGRATION WITH DECISION LAYER
+# ============================================================================
+
+## Data Flow:
+
+Decision Layer (riskengine/)
+  ├─ decision_engine.py → DecisionOutput
+  ├─ priority_calculator.py → Priority scores
+  ├─ remediation_strategy.py → Strategy recommendation
+  ├─ compliance_mapper.py → Compliance violations
+  └─ rollback_risk_assessor.py → Rollback risk
+
+                    ↓
+                    
+Execution Layer (services/)
+  ├─ component_mapper.py → Map CVE to components
+  ├─ mitigation_catalogue_loader.py → Load controls
+  ├─ execution_engine.py → Generate plan & execute
+  └─ test_validator.py → Validate before execution
+
+                    ↓
+                    
+Audit & Logging
+  ├─ execution_log.sqlite
+  ├─ Audit trail
+  └─ Reasoning chains
+
+# ============================================================================
+# CATALOGUE LOADING EXAMPLE
+# ============================================================================
+
+```python
+from src.services.mitigation_catalogue_loader import MitigationCatalogueLoader, MitigationType
+
+# Initialize loader
+loader = MitigationCatalogueLoader(catalogue_dir="src/catalogues")
+
+# Load all catalogues
+loader.load_all_catalogues()
+
+# Get statistics
+stats = loader.get_statistics()
+print(f"Total Controls: {stats['total_controls']}")
+print(f"By Category:")
+for category, count in stats['controls_by_category'].items():
+    print(f"  {category.upper()}: {count}")
+
+# Find controls by category
+network_controls = loader.get_controls_by_category(MitigationType.NETWORK)
+print(f"Network Controls: {len(network_controls)}")
+
+# Search for specific control
+net01 = loader.get_control("NET-01")
+print(f"\nControl NET-01:")
+print(f"  Name: {net01.name}")
+print(f"  Methods: {len(net01.enforcement_methods)}")
+print(f"  Validation Steps: {len(net01.validation_checks)}")
+
+# Search by keyword
+smb_controls = loader.search_controls("SMB")
+print(f"\nSMB-related Controls: {len(smb_controls)}")
+for control in smb_controls:
+    print(f"  {control.control_id}: {control.name}")
+```
+
+# ============================================================================
+# COMPONENT MAPPING EXAMPLE
+# ============================================================================
+
+```python
+from src.services.component_mapper import ComponentMapper
+
+mapper = ComponentMapper()
+
+# Map vulnerability to components
+vuln_map = mapper.map_vulnerability(
+    cve_id="CVE-2021-1234",
+    vulnerability_keywords=["SMB", "RCE", "ransomware"],
+    os_version="Windows 10"
+)
+
+print(f"Components Affected: {len(vuln_map.components)}")
+for comp in vuln_map.components:
+    print(f"  - {comp.name} ({comp.component_type.value}): {comp.severity.value}")
+    if comp.associated_services:
+        print(f"    Services: {', '.join(comp.associated_services)}")
+
+print(f"\nApplicable Controls: {len(vuln_map.applicable_controls)}")
+for control_id, keywords in vuln_map.applicable_controls.items():
+    print(f"  {control_id}: {', '.join(keywords)}")
+
+# Get affected systems
+affected = mapper.get_affected_systems("CVE-2021-1234", vuln_map)
+print(f"\nAffected Systems: {len(affected)}")
+
+# Generate remediation plan
+plan = mapper.generate_remediation_plan(vuln_map, {})
+print(f"\nRemediation Plan:")
+print(f"  Total Effort: {plan['total_effort']} hours")
+print(f"  Phases: {len(plan['phases'])}")
+for phase in plan['phases']:
+    print(f"    Phase {phase['phase']}: {phase['name']}")
+```
+
+# ============================================================================
+# DEPLOYMENT CHECKLIST - EXECUTION LAYER
+# ============================================================================
+
+Pre-Integration:
+  □ Copy all 4 modules to src/services/
+  □ Verify catalogues exist in src/catalogues/
+  □ Check database paths match your setup
+  □ Update import statements if needed
+
+Integration:
+  □ Import ExecutionEngine in backend
+  □ Create endpoint /api/execution/plan/<cve_id>
+  □ Create endpoint /api/execution/<plan_id>/validate
+  □ Create endpoint /api/execution/<plan_id>/execute
+  □ Create endpoint /api/execution/<plan_id>/results
+  □ Add validation workflow to UI
+
+Testing:
+  □ Test component mapping with sample CVEs
+  □ Test catalogue loading
+  □ Run dry-run mode
+  □ Test sandbox mode with test system
+  □ Verify database persistence
+  □ Check audit trail logging
+
+Production:
+  □ Configure execution database backup
+  □ Set up execution monitoring
+  □ Configure alerting on failures
+  □ Schedule catalogue updates
+  □ Monitor performance with large batches
+  □ Implement parallel execution (Phase 2)
+
+# ============================================================================
+# NEXT STEPS & ENHANCEMENTS
+# ============================================================================
+
+Phase 1 (Current):
+  ✓ Mitigation Catalogue Loader
+  ✓ Component Mapper
+  ✓ Execution Engine (plan generation)
+  ✓ Test Validator
+
+Phase 2 (Recommendations):
+  □ Async batch execution (concurrent.futures)
+  □ Real system execution (PowerShell remoting)
+  □ Progress streaming via WebSocket
+  □ Parallel execution across systems
+  □ GPU-accelerated component analysis
+  □ ML model for control effectiveness
+
+Phase 3 (Enterprise):
+  □ ITSM integration (ServiceNow, Jira)
+  □ CMI integration (SCCM, Ansible)
+  □ External logging (ELK, Splunk)
+  □ Cost analytics
+  □ Predictive rollback modeling
+  □ Multi-tenant support
+
+# ============================================================================
+"""

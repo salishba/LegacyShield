@@ -1,0 +1,792 @@
+"""
+ROLLBACK_LAYER_GUIDE.txt
+========================
+
+Complete Rollback Layer Integration & Reference Guide
+Production-ready rollback orchestration and recovery
+"""
+
+# ============================================================================
+# ROLLBACK LAYER OVERVIEW
+# ============================================================================
+
+The Rollback Layer is the fourth layer of SmartPatch, handling automatic rollback
+of failed deployments, registry restoration, service recovery, and system state
+validation. It integrates with the Execution Layer to ensure safe deployment by
+enabling rapid recovery from failures.
+
+Total Rollback Layer: 2,100+ lines of production code
+
+## Four Core Modules:
+
+1. system_state_snapshot.py (600+ lines)
+   Purpose: Capture, store, and compare system state snapshots
+   Enables rollback through pre/post state comparison
+
+2. registry_rollback.py (550+ lines)
+   Purpose: Registry backup and restoration procedures
+   Handles atomic registry recovery for all affected systems
+
+3. service_rollback.py (600+ lines)
+   Purpose: Service state management and recovery
+   Restores services to pre-deployment state
+
+4. rollback_recovery.py (700+ lines)
+   Purpose: Integrated recovery workflows
+   Coordinates multi-system recovery with error handling
+
+5. rollback_manager.py (650+ lines)
+   Purpose: Main orchestrator coordinating all components
+   Handles end-to-end rollback operations
+
+---
+
+# ============================================================================
+# COMPLETE ARCHITECTURE & DATA FLOW
+# ============================================================================
+
+## When Deployment Fails:
+
+Execution Engine
+    ↓
+Detects failure (validation failed, service error, timeout)
+    ↓
+Test Validator
+    ↓
+Reports failure status
+    ↓
+Rollback Manager (Main Orchestrator)
+    │
+    ├─────────────┬─────────────┬─────────────┐
+    │             │             │             │
+    ↓             ↓             ↓             ↓
+System State  Registry      Service       Recovery
+Snapshot      Rollback      Rollback      Manager
+Manager       Manager       Manager
+    │             │             │             │
+    ├─ Capture  ├─ Restore  ├─ Stop    ├─ Coordinate
+    │ pre-roll  │ registry  │ services │ multi-system
+    ↓           ↓           ↓          ↓
+    ├→ Compare ─→ Validate ─→ Verify ─→ Report
+    
+    ↓
+Database: execution_log.sqlite (13 tables for full audit)
+    ├─ system_snapshots
+    ├─ state_changes
+    ├─ registry_backups
+    ├─ backed_up_values
+    ├─ service_snapshots
+    ├─ rollback_recovery_plans
+    ├─ recovery_steps
+    └─ rollback_operations (main tracking)
+
+---
+
+# ============================================================================
+# MODULE DETAILS
+# ============================================================================
+
+## Module 1: system_state_snapshot.py (600+ lines)
+
+Purpose: Capture system state at key points for comparison and rollback
+
+Key Classes:
+
+  StateComponentType (Enum)
+    - REGISTRY, SERVICE, FILE, DRIVER, FIREWALL_RULE, GROUP_POLICY, 
+      SCHEDULED_TASK, SYSTEM_SETTING
+  
+  StateChangeType (Enum)
+    - ADDED, REMOVED, MODIFIED, UNCHANGED
+  
+  RegistryKeySnapshot (dataclass)
+    - Captures single registry key value
+    - Stores: hive, path, value_name, value_data, value_type, timestamp
+  
+  ServiceSnapshot (dataclass)
+    - Captures service state
+    - Stores: service_name, status, startup_type, dependencies, account
+  
+  FileSnapshot (dataclass)
+    - Captures file state with hashing
+    - Stores: file_path, file_hash (SHA256), modified_time, version
+  
+  DriverSnapshot (dataclass)
+    - Captures driver/kernel module state
+    - Stores: driver_name, status, start_type, version
+  
+  SystemStateSnapshot (dataclass)
+    - Complete system snapshot
+    - Contains: registry_keys[], services[], files[], drivers[]
+  
+  StateChange (dataclass)
+    - Single detected change from comparison
+    - Stores: component_type, change_type, pre_state, post_state, severity
+  
+  StateChangeReport (dataclass)
+    - Complete comparison report
+    - Calculates: total_changes, critical_changes, rollback_required
+  
+  SystemStateManager (class)
+    - Main snapshot manager
+    - Methods:
+      * create_snapshot(system_id, snapshot_type) → SystemStateSnapshot
+      * save_snapshot(snapshot) → bool
+      * get_snapshot(snapshot_id) → SystemStateSnapshot
+      * compare_snapshots(pre_id, post_id) → StateChangeReport
+    
+Database Tables:
+  - system_snapshots (main snapshot storage)
+  - state_changes (individual detected changes)
+  - state_change_reports (comparison results)
+
+Example Usage:
+  manager = SystemStateManager()
+  
+  # Capture pre-deployment state
+  pre = manager.create_snapshot("SYSTEM-01", "pre_deployment")
+  manager.save_snapshot(pre)
+  
+  # Deploy...
+  
+  # Capture post-deployment state
+  post = manager.create_snapshot("SYSTEM-01", "post_deployment")
+  manager.save_snapshot(post)
+  
+  # Compare
+  report = manager.compare_snapshots(pre.snapshot_id, post.snapshot_id)
+  if report.rollback_required:
+      # Initiate rollback
+
+---
+
+## Module 2: registry_rollback.py (550+ lines)
+
+Purpose: Backup and restore registry for safe rollback
+
+Key Classes:
+
+  RegistryHive (Enum)
+    - HKLM, HKCU, HKCR, HKU, HKCC
+  
+  RegistryValueType (Enum)
+    - REG_SZ, REG_DWORD, REG_BINARY, REG_MULTI_SZ, REG_EXPAND_SZ
+  
+  RegistryValue (dataclass)
+    - Single registry value
+    - Stores: hive, path, name, value, value_type, timestamp
+  
+  RegistryBackup (dataclass)
+    - Complete registry backup for specific paths
+    - Stores: backed_up_values[], affected_keys[], backup_type
+  
+  RegistryRestoreAction (dataclass)
+    - Single restore operation
+    - Stores: restore_operation (set_value, delete_value, delete_key), status
+  
+  RegistryRollbackReport (dataclass)
+    - Complete restore report
+    - Calculates: successful_actions, failed_actions, rollback_success
+  
+  RegistryRollbackManager (class)
+    - Main registry manager
+    - Methods:
+      * create_backup(system_id, backup_type, registry_paths) → RegistryBackup
+      * save_backup(backup) → bool
+      * restore_from_backup(backup_id) → RegistryRollbackReport
+      * get_backup_history(system_id, limit) → List[Dict]
+    
+Database Tables:
+  - registry_backups (backup storage)
+  - backed_up_values (individual values backed up)
+  - registry_restore_actions (individual restore operations)
+  - registry_rollback_reports (restore results)
+
+Example Usage:
+  manager = RegistryRollbackManager()
+  
+  # Create backup before patch
+  paths = [
+      (RegistryHive.HKLM, "SOFTWARE\\...\\"),
+      (RegistryHive.HKLM, "SYSTEM\\CurrentControlSet\\Services")
+  ]
+  backup = manager.create_backup("SYSTEM-01", "pre_patch", paths)
+  manager.save_backup(backup)
+  
+  # Apply patch...
+  
+  # If patch fails, restore
+  report = manager.restore_from_backup(backup.backup_id)
+  print(f"Restore: {report.successful_actions}/{report.total_actions} successful")
+
+---
+
+## Module 3: service_rollback.py (600+ lines)
+
+Purpose: Manage service state and recovery
+
+Key Classes:
+
+  ServiceStatus (Enum)
+    - RUNNING, STOPPED, PAUSED, STARTING, STOPPING, UNKNOWN
+  
+  ServiceStartupType (Enum)
+    - AUTO, MANUAL, DISABLED, AUTO_DELAYED, BOOT, SYSTEM
+  
+  ServiceSnapshot (dataclass)
+    - Service state at point in time
+    - Stores: service_name, status, startup_type, dependencies, executable_path
+  
+  ServiceRestoreAction (dataclass)
+    - Single service restore action
+    - Stores: action_type (start, stop, restart, set_startup_type), status
+  
+  ServiceRollbackPlan (dataclass)
+    - Plan to restore services
+    - Stores: pre_remediation_states[], post_remediation_states[], restore_actions[]
+  
+  ServiceRollbackReport (dataclass)
+    - Report of service restore operations
+    - Calculates: successful_actions, failed_actions, total_duration_seconds
+  
+  ServiceRollbackManager (class)
+    - Main service manager
+    - Methods:
+      * snapshot_service(...) → ServiceSnapshot
+      * save_snapshot(...) → bool
+      * create_rollback_plan(system_id, pre_states, post_states) → ServiceRollbackPlan
+      * save_rollback_plan(plan) → bool
+      * execute_rollback_plan(plan) → ServiceRollbackReport
+    
+Database Tables:
+  - service_snapshots (service state snapshots)
+  - service_rollback_plans (recovery plans)
+  - service_restore_actions (individual actions)
+  - service_rollback_reports (execution results)
+
+Example Usage:
+  manager = ServiceRollbackManager()
+  
+  # Snapshot services before patch
+  pre_spooler = manager.snapshot_service(
+      "SYSTEM-01", "Spooler", "Print Spooler",
+      ServiceStatus.RUNNING, ServiceStartupType.AUTO,
+      snapshot_type="pre_patch"
+  )
+  manager.save_snapshot("SYSTEM-01", "Spooler", pre_spooler, "pre_patch")
+  
+  # Apply patch (which might disable service)...
+  
+  # Create rollback plan
+  post_spooler = manager.snapshot_service(...)
+  plan = manager.create_rollback_plan("SYSTEM-01", {"Spooler": pre_spooler}, {"Spooler": post_spooler})
+  
+  # Execute rollback
+  report = manager.execute_rollback_plan(plan)
+  print(f"Service restore: {report.successful_actions}/{report.total_actions} successful")
+
+---
+
+## Module 4: rollback_recovery.py (700+ lines)
+
+Purpose: Coordinate multi-system recovery workflows
+
+Key Classes:
+
+  RecoveryStrategy (Enum)
+    - ATOMIC: All or nothing
+    - STAGED: 10%, 50%, 100% rollout
+    - PROGRESSIVE: One system at a time
+    - CONSERVATIVE: Full validation between steps
+    - AGGRESSIVE: Quick rollback, validate after
+  
+  RecoveryPhase (Enum)
+    - DISCOVERY, PRE_CHECK, REGISTRY_RESTORE, SERVICE_RESTORE, 
+      DRIVER_RESTORE, VERIFICATION, VALIDATION
+  
+  RecoveryStep (dataclass)
+    - Single recovery operation
+    - Stores: phase, system_id, operation, status, duration_seconds
+  
+  ErrorRecoveryAction (dataclass)
+    - Action to recover from error
+    - Stores: error_type, recovery_operation, retry_count
+  
+  RollbackRecoveryPlan (dataclass)
+    - Complete recovery plan
+    - Stores: recovery_steps[], error_recovery_actions[], strategy
+  
+  RollbackRecoveryReport (dataclass)
+    - Report of recovery execution
+    - Calculates: successful_systems, failed_systems, system summary
+  
+  RollbackRecoveryManager (class)
+    - Main recovery orchestrator
+    - Methods:
+      * create_recovery_plan(execution_plan_id, systems, strategy) → RollbackRecoveryPlan
+      * save_recovery_plan(plan) → bool
+      * execute_recovery_plan(plan) → RollbackRecoveryReport
+    
+Database Tables:
+  - rollback_recovery_plans (recovery plans)
+  - recovery_steps (individual steps)
+  - error_recovery_actions (error handling)
+  - rollback_recovery_reports (execution results)
+
+Recovery Strategies:
+
+  1. ATOMIC (All or Nothing)
+     └─ All systems succeed or all rollback
+     └─ Best for: Small deployments
+     └─ Risk: One system failure blocks entire deployment
+  
+  2. STAGED (10%, 50%, 100%)
+     └─ Deploy to 10% first, validate, then 50%, then 100%
+     └─ Best for: Medium/large deployments
+     └─ Risk: Partial deployments
+  
+  3. PROGRESSIVE (One system at a time)
+     └─ Deploy to one system, validate, move to next
+     └─ Best for: Large deployments with high risk
+     └─ Risk: Slow deployment
+  
+  4. CONSERVATIVE (Full validation between steps)
+     └─ Each step includes pre-check, execution, verification, validation
+     └─ Best for: Critical systems
+     └─ Risk: Very slow deployment
+  
+  5. AGGRESSIVE (Quick rollback, validate after)
+     └─ Deploy quickly, handle failures with rapid rollback
+     └─ Best for: Non-critical systems where speed matters
+     └─ Risk: Potential state inconsistency during validation
+
+Example Usage:
+  manager = RollbackRecoveryManager()
+  
+  # Create recovery plan
+  plan = manager.create_recovery_plan(
+      execution_plan_id="PLAN-001",
+      affected_systems=["SYSTEM-01", "SYSTEM-02", "SYSTEM-03"],
+      strategy=RecoveryStrategy.PROGRESSIVE,
+      reason="Service compatibility issue detected"
+  )
+  manager.save_recovery_plan(plan)
+  
+  # Execute recovery
+  report = manager.execute_recovery_plan(plan)
+  print(f"Recovery: {report.successful_systems}/{report.total_systems} systems successful")
+
+---
+
+## Module 5: rollback_manager.py (650+ lines)
+
+Purpose: Main orchestrator coordinating all rollback operations
+
+Key Classes:
+
+  RollbackTrigger (Enum)
+    - DEPLOYMENT_FAILED, VALIDATION_FAILED, SERVICE_ERROR, REGISTRY_ERROR,
+      MANUAL_REQUEST, TIMEOUT, CRITICAL_ERROR, UNKNOWN_ERROR
+  
+  RollbackInitiation (dataclass)
+    - Request to initiate rollback
+    - Stores: initiator_type, trigger, affected_systems, reason_detail
+  
+  RollbackState (dataclass)
+    - Current rollback operation state
+    - Stores: status, snapshot_report, registry_report, service_report, recovery_report
+  
+  RollbackManager (class)
+    - Main rollback orchestrator
+    - Coordinates all component managers
+    - Methods:
+      * initiate_rollback(initiation) → RollbackState
+      * execute_rollback(state) → RollbackState
+      * get_rollback_status(rollback_id) → RollbackState
+    
+Complete Rollback Flow (6 Steps):
+
+  1. SNAPSHOT CAPTURE
+     └─ Capture pre-rollback system state for comparison
+     └─ Uses: SystemStateManager.create_snapshot()
+     └─ Output: pre_rollback_snapshots
+  
+  2. REGISTRY ROLLBACK
+     └─ Restore registry to pre-deployment state
+     └─ Uses: RegistryRollbackManager.restore_from_backup()
+     └─ Output: registry_results (success/fail per system)
+  
+  3. SERVICE ROLLBACK
+     └─ Restore service states (start/stop/disable)
+     └─ Uses: ServiceRollbackManager.execute_rollback_plan()
+     └─ Output: service_results (success/fail per system)
+  
+  4. RECOVERY EXECUTION
+     └─ Coordinate multi-system recovery with strategy
+     └─ Uses: RollbackRecoveryManager.execute_recovery_plan()
+     └─ Output: recovery_results (system-level success metrics)
+  
+  5. POST-ROLLBACK VERIFICATION
+     └─ Capture post-rollback state and compare
+     └─ Uses: SystemStateManager.compare_snapshots()
+     └─ Output: validation_results (state consistency verification)
+  
+  6. FINAL VALIDATION
+     └─ Determine overall rollback success
+     └─ Statuses: completed, partial_failure, failed
+     └─ Output: RollbackState with complete results
+
+Database Tables (30+ tables total for rollback):
+  - rollback_operations (main tracking)
+  - rollback_component_logs (component execution logs)
+  - rollback_decision_log (decision tracking)
+  - system_snapshots (state snapshots)
+  - registry_backups (registry backups)
+  - service_snapshots (service states)
+  - rollback_recovery_plans (recovery plans)
+  - recovery_steps (recovery execution steps)
+  - state_changes (detected state changes)
+  - All component-specific tables from modules
+
+Example Usage:
+  manager = RollbackManager()
+  
+  # Initiate rollback
+  initiation = RollbackInitiation(
+      initiator_type="system",
+      initiator="ExecutionEngine",
+      trigger=RollbackTrigger.DEPLOYMENT_FAILED,
+      affected_systems=["SYSTEM-01", "SYSTEM-02"],
+      affected_plan_id="PLAN-001",
+      affected_cve_id="CVE-2023-1234",
+      reason_detail="Service conflict detected"
+  )
+  
+  state = manager.initiate_rollback(initiation)
+  print(f"Rollback initiated: {state.rollback_id}")
+  
+  # Execute rollback (all 6 steps automatically)
+  result = manager.execute_rollback(state)
+  
+  print(f"Rollback status: {result.status}")
+  print(f"Successful systems: {result.successful_systems}/{result.total_systems}")
+  
+  # Check status later
+  status = manager.get_rollback_status(state.rollback_id)
+
+---
+
+# ============================================================================
+# INTEGRATION WITH EXECUTION LAYER
+# ============================================================================
+
+Execution Engine Integration:
+
+  1. Normal Execution Flow
+     ExecutionEngine.execute_plan(plan, mode=PRODUCTION)
+         ↓
+     Deployment succeeds
+         ↓
+     Result: success (no rollback needed)
+
+  2. Failure Detection Flow
+     ExecutionEngine.execute_plan(plan, mode=PRODUCTION)
+         ↓
+     Deployment fails (validation error, service error, etc.)
+         ↓
+     TestValidator detects failure
+         ↓
+     RollbackManager.initiate_rollback(reason)
+         ↓
+     RollbackManager.execute_rollback()
+         ↓
+     6-step rollback process
+         ↓
+     Result: rolled_back (system restored to pre-deployment)
+
+Integration Code:
+
+  from src.services.execution_engine import ExecutionEngine
+  from src.services.test_validator import TestValidator
+  from src.services.rollback_manager import RollbackManager, RollbackInitiation, RollbackTrigger
+  
+  engine = ExecutionEngine()
+  validator = TestValidator()
+  rollback_mgr = RollbackManager()
+  
+  # Generate and validate plan
+  plan = engine.generate_remediation_plan(cve_id, decision, components, os)
+  report = validator.generate_validation_report()
+  
+  if not report.safe_to_deploy:
+      print("Deployment blocked - unsafe")
+      sys.exit(1)
+  
+  # Execute
+  try:
+      result = engine.execute_plan(plan, mode=ExecutionMode.PRODUCTION)
+      
+      if result['status'] != 'success':
+          # Failure detected - initiate rollback
+          initiation = RollbackInitiation(
+              initiator_type="system",
+              initiator="ExecutionEngine",
+              trigger=RollbackTrigger.DEPLOYMENT_FAILED,
+              affected_systems=[plan.affected_systems],
+              affected_plan_id=plan.plan_id,
+              affected_cve_id=plan.cve_id,
+              reason_detail=result.get('error', 'Unknown error')
+          )
+          
+          state = rollback_mgr.initiate_rollback(initiation)
+          rollback_result = rollback_mgr.execute_rollback(state)
+          
+          print(f"Deployment failed, initiated rollback: {state.rollback_id}")
+          print(f"Rollback status: {rollback_result.status}")
+  
+  except Exception as e:
+      # Exception during execution - emergency rollback
+      print(f"Execution error: {e}")
+      # Trigger immediate rollback
+
+---
+
+# ============================================================================
+# DATABASE SCHEMA
+# ============================================================================
+
+All rollback data stored in execution_log.sqlite with 30+ tables:
+
+Main Rollback Tables:
+  - rollback_operations (rollback_id, status, affected_plan_id, initiator, trigger, ...)
+  - rollback_component_logs (component execution logs)
+  - rollback_decision_log (rollback decisions made)
+
+Snapshot Tables:
+  - system_snapshots (snapshot_id, system_id, snapshot_type, snapshot_json)
+  - state_changes (detected changes from comparison)
+  - state_change_reports (comparison results)
+
+Registry Rollback Tables:
+  - registry_backups (backup_id, system_id, backup_type, backup_json)
+  - backed_up_values (individual registry values)
+  - registry_restore_actions (individual restore operations)
+  - registry_rollback_reports (restoration results)
+
+Service Rollback Tables:
+  - service_snapshots (service state at point in time)
+  - service_rollback_plans (recovery plans)
+  - service_restore_actions (individual actions)
+  - service_rollback_reports (execution results)
+
+Recovery Tables:
+  - rollback_recovery_plans (recovery plans)
+  - recovery_steps (individual recovery steps)
+  - error_recovery_actions (error handling actions)
+  - rollback_recovery_reports (recovery execution results)
+
+---
+
+# ============================================================================
+# DEPLOYMENT CHECKLIST
+# ============================================================================
+
+Before Production Rollback Layer Deployment:
+
+Prerequisites:
+  ☐ Execution Layer fully functional (test with dry-run)
+  ☐ Test Validator working and detecting errors correctly
+  ☐ execution_log.sqlite exists and is writable
+  ☐ All database tables created successfully
+  ☐ Logging configured (file and console)
+
+Module Testing:
+  ☐ SystemStateManager creates and compares snapshots
+  ☐ RegistryRollbackManager backs up and restores registry
+  ☐ ServiceRollbackManager creates and executes service plans
+  ☐ RollbackRecoveryManager creates and executes recovery plans
+  ☐ RollbackManager orchestrates complete rollback flow
+
+Integration Testing:
+  ☐ Rollback triggered on deployment failure
+  ☐ All 6 rollback steps execute automatically
+  ☐ Registry properly restored
+  ☐ Services properly restored
+  ☐ System state matches pre-deployment after rollback
+  ☐ Audit trail complete (all operations logged)
+
+System Testing:
+  ☐ Test on Windows 7 system
+  ☐ Test on Windows 10 system
+  ☐ Test with multi-system rollback (STAGED strategy)
+  ☐ Test with error recovery (CONSERVATIVE strategy)
+  ☐ Verify database integrity after rollback
+  ☐ Verify no data loss during rollback
+
+Performance Testing:
+  ☐ Single system rollback: < 5 minutes
+  ☐ Multi-system rollback: < 15 minutes (3 systems)
+  ☐ Registry restore: < 1 minute per system
+  ☐ Service restore: < 30 seconds per service
+  ☐ No significant system performance impact
+
+Security Testing:
+  ☐ Rollback only affects intended systems/components
+  ☐ No unintended registry/service changes
+  ☐ Audit trail cannot be altered retroactively
+  ☐ Proper rollback authorization enforced
+
+---
+
+# ============================================================================
+# TROUBLESHOOTING
+# ============================================================================
+
+Issue: Rollback fails to restore registry
+
+  Diagnosis:
+    1. Check registry_rollback_reports table
+    2. Look for failed actions in registry_restore_actions
+    3. Check error_message field
+  
+  Solutions:
+    1. Verify backup exists: SELECT * FROM registry_backups WHERE backup_id = ?
+    2. Check file permissions on registry backup file
+    3. Check system registry permissions
+    4. Manually verify registry values restored
+
+Issue: Rollback times out
+
+  Diagnosis:
+    1. Check recovery_steps status
+    2. Look for in_progress steps that didn't complete
+    3. Check system connectivity
+  
+  Solutions:
+    1. Increase timeout in RollbackRecoveryManager
+    2. Use PROGRESSIVE strategy for large deployments
+    3. Check system network connectivity
+    4. Reduce number of systems in single rollback
+
+Issue: Partial rollback (some systems succeeded, some failed)
+
+  Diagnosis:
+    1. Set strategy to CONSERVATIVE (maximum validation)
+    2. Check error_recovery_actions table
+    3. Review failed recovery_steps
+  
+  Solutions:
+    1. Manually verify state on failed systems
+    2. Retry rollback on failed systems
+    3. Review system-specific logs (Event Viewer, PowerShell logs)
+
+Issue: Service won't restart after rollback
+
+  Diagnosis:
+    1. Check service_rollback_reports
+    2. Verify service dependencies
+    3. Check Windows Event Viewer
+  
+  Solutions:
+    1. Manually restart service
+    2. Check for circular dependencies
+    3. Restart dependent services first
+    4. Check service account permissions
+
+---
+
+# ============================================================================
+# PRODUCTION CONSIDERATIONS
+# ============================================================================
+
+1. Pre-Deployment Snapshots
+   - Always snapshot before any remediation
+   - Store multiple snapshots for comparison
+   - Include all components: registry, services, files, drivers
+
+2. Backup Strategy
+   - Maintain backups for 30+ days
+   - Encrypt backups at rest
+   - Test backup restoration regularly
+
+3. Recovery Strategy Selection
+   - ATOMIC: Small number of systems (< 10)
+   - STAGED: Medium deployments (10-100 systems)
+   - PROGRESSIVE: Large/critical deployments (> 100 systems)
+   - CONSERVATIVE: Highly critical systems
+   - AGGRESSIVE: Non-critical systems where speed matters
+
+4. Monitoring & Alerting
+   - Monitor rollback_operations table for failures
+   - Alert on: failed_systems > 0, recovery_success = false
+   - Alert on: partial_failure status
+   - Track rollback duration trends
+
+5. Audit & Compliance
+   - Complete audit trail in rollback_decision_log
+   - Track who initiated rollback and why
+   - Store all snapshots for 90+ days
+   - Generate compliance reports monthly
+
+6. Error Handling
+   - Implement automatic retry for transient errors
+   - Log all errors to audit trail
+   - Generate detailed error reports for manual review
+   - Escalate critical errors to administrators
+
+---
+
+# ============================================================================
+# QUICK REFERENCE: COMMON OPERATIONS
+# ============================================================================
+
+Create Rollback Initiation:
+  initiation = RollbackInitiation(
+      initiator_type="system",
+      initiator="ExecutionEngine",
+      trigger=RollbackTrigger.DEPLOYMENT_FAILED,
+      affected_systems=["SYSTEM-01"],
+      affected_plan_id="PLAN-001",
+      affected_cve_id="CVE-2023-1234",
+      reason_detail="Error message"
+  )
+
+Initiate Rollback:
+  manager = RollbackManager()
+  state = manager.initiate_rollback(initiation)
+
+Execute Rollback:
+  result = manager.execute_rollback(state)
+  print(f"Status: {result.status}")
+
+Query Rollback Status:
+  # From database
+  SELECT * FROM rollback_operations 
+  WHERE rollback_id = 'rollback_...'
+  
+  # From manager
+  status = manager.get_rollback_status(rollback_id)
+
+Query Snapshot Comparison:
+  SELECT * FROM state_change_reports
+  WHERE pre_snapshot_id = '...' AND post_snapshot_id = '...'
+
+Query Registry Restore:
+  SELECT * FROM registry_rollback_reports
+  WHERE backup_id = '...'
+
+Query Service Restore:
+  SELECT * FROM service_rollback_reports
+  WHERE plan_id = '...'
+
+Query Recovery Progress:
+  SELECT phase, COUNT(*) as count, status
+  FROM recovery_steps
+  WHERE plan_id = '...'
+  GROUP BY phase, status
+  ORDER BY phase
+
+---
+
+# ============================================================================
+"""
