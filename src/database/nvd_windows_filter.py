@@ -1,128 +1,134 @@
+import os
 import json
-import glob
-from pathlib import Path
-import argparse
-import sys
+import pandas as pd
 
-WINDOWS_PRODUCTS = [
-    "windows_7",
-    "windows_8",
-    "windows_8.1",
-    "windows_10"
+BASE_PATH = "src/catalogues"
+START_YEAR = 2021
+END_YEAR = 2025
+
+OUTPUT_FILE = os.path.join(
+    BASE_PATH,
+    "windows10_security_2021_2025.json"
+)
+
+# Columns we want in final JSON
+REQUIRED_FIELDS = [
+    "Impact",
+    "Max Severity",
+    "Article",
+    "Supercedence",
+    "Download",
+    "Build Number",
+    "Details",
+    "CWE",
+    "Customer Action Required"
 ]
 
-def cpe_matches_windows(cpe_uri):
-    """Check if a CPE URI (2.2 or 2.3) indicates Windows OS."""
-    cpe_lower = cpe_uri.lower()
-    # Must be an OS (part = 'o' in either format)
-    # CPE 2.3: "cpe:2.3:o:microsoft:windows_7..."
-    # CPE 2.2: "cpe:/o:microsoft:windows_7..."
-    if not (cpe_lower.startswith("cpe:/o:") or cpe_lower.startswith("cpe:2.3:o:")):
-        return False
-    # Now check if the product name is in our list
-    for product in WINDOWS_PRODUCTS:
-        if f":{product}" in cpe_lower or f"/{product}" in cpe_lower:
-            return True
+def is_security_update(row: pd.Series) -> bool:
+    """
+    Filter only security updates.
+    Accept rows where Impact or Max Severity is populated.
+    """
+    if pd.notna(row.get("Impact")):
+        return True
+
+    if pd.notna(row.get("Max Severity")):
+        return True
+
     return False
 
-def node_contains_windows(node):
-    """Recursively check a node and its children for Windows CPEs."""
-    for cpe_entry in node.get("cpeMatch", []):
-        cpe_uri = cpe_entry.get("criteria", "")
-        if cpe_matches_windows(cpe_uri):
+
+def is_kernel_related(row: pd.Series) -> bool:
+    """
+    Exclude anything mentioning kernel in Details or Impact.
+    """
+    fields_to_check = [
+        str(row.get("Details", "")).lower(),
+        str(row.get("Impact", "")).lower()
+    ]
+
+    for field in fields_to_check:
+        if "kernel" in field:
             return True
-    for child in node.get("children", []):
-        if node_contains_windows(child):
-            return True
+
     return False
 
-def main():
-    parser = argparse.ArgumentParser(description="Filter NVD JSON (API 2.0 format) for Windows OS CVEs.")
-    parser.add_argument("--input-dir", default="src/catalogues", help="Directory containing NVD JSON files")
-    parser.add_argument("--output", default="src/catalogues/windows7-10_cves.json", help="Output JSON file")
-    args = parser.parse_args()
 
-    input_dir = Path(args.input_dir)
-    output_file = Path(args.output)
+def clean_row(row: pd.Series) -> dict:
+    """
+    Keep only required fields.
+    """
+    cleaned = {}
 
-    nvd_files = sorted(glob.glob(str(input_dir / "nvdcve-2.0-*.json")))
-    if not nvd_files:
-        print(f"No NVD files found in {input_dir}", file=sys.stderr)
-        sys.exit(1)
+    for field in REQUIRED_FIELDS:
+        value = row.get(field)
 
-    filtered_cves = {}
-    total_processed = 0
+        if pd.isna(value):
+            cleaned[field] = None
+        else:
+            cleaned[field] = str(value).strip()
 
-    for file_path in nvd_files:
-        print(f"Processing {file_path} ...")
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            print(f"Error reading {file_path}: {e}", file=sys.stderr)
+    return cleaned
+
+
+def process_year(year: int) -> list:
+    file_path = os.path.join(
+        BASE_PATH,
+        f"windows10_{year}.xlsx"
+    )
+
+    if not os.path.exists(file_path):
+        print(f"[!] File not found: {file_path}")
+        return []
+
+    print(f"[+] Processing {file_path}")
+
+    df = pd.read_excel(file_path)
+
+    results = []
+
+    for _, row in df.iterrows():
+
+        # Keep only security updates
+        if not is_security_update(row):
             continue
 
-        # In API 2.0 format, CVEs are under "vulnerabilities" array
-        vulnerabilities = data.get("vulnerabilities", [])
-        for vuln in vulnerabilities:
-            total_processed += 1
-            cve_item = vuln.get("cve")
-            if not cve_item:
-                continue
-            cve_id = cve_item.get("id")
-            if not cve_id or cve_id in filtered_cves:
-                continue
+        # Remove kernel-related
+        if is_kernel_related(row):
+            continue
 
-            # Configurations are inside cve_item under "configurations" (array of objects)
-            configs = cve_item.get("configurations", [])
-            windows_affected = False
-            for config in configs:
-                nodes = config.get("nodes", [])
-                if any(node_contains_windows(node) for node in nodes):
-                    windows_affected = True
-                    break
-            if windows_affected:
-                filtered_cves[cve_id] = cve_item  # store the whole cve object
+        cleaned = clean_row(row)
+        results.append(cleaned)
 
-    # Optional: show a sample matched CVE for verification
-    if filtered_cves:
-        sample_cve = next(iter(filtered_cves.values()))
-        print("\nSample CVE that matched:")
-        print(f"  ID: {sample_cve['id']}")
-        # Show first matching CPE
-        configs = sample_cve.get("configurations", [])
-        for config in configs:
-            for node in config.get("nodes", []):
-                for cpe in node.get("cpeMatch", []):
-                    if cpe_matches_windows(cpe["criteria"]):
-                        print(f"  Matching CPE: {cpe['criteria']}")
-                        break
-                break
-            break
-    else:
-        print("\nNo CVEs matched. Checking first few CVEs for Windows CPEs...")
-        # Debug: look at first 5 CVEs from the first file
-        if nvd_files:
-            with open(nvd_files[0], "r", encoding="utf-8") as f:
-                data = json.load(f)
-            for i, vuln in enumerate(data.get("vulnerabilities", [])[:5]):
-                cve_item = vuln.get("cve", {})
-                cve_id = cve_item.get("id", "unknown")
-                print(f"  CVE {cve_id}:")
-                configs = cve_item.get("configurations", [])
-                for config in configs:
-                    for node in config.get("nodes", []):
-                        for cpe in node.get("cpeMatch", []):
-                            print(f"    CPE: {cpe['criteria']}")
-                print()
+    print(f"[+] {year}: {len(results)} security entries kept")
+    return results
 
-    # Convert to list and save
-    output_list = list(filtered_cves.values())
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(output_list, f, indent=2)
 
-    print(f"\nDone! Processed {total_processed} CVEs, found {len(output_list)} unique Windows OS CVEs. Saved to {output_file}")
+def main():
+    all_results = []
+
+    for year in range(START_YEAR, END_YEAR + 1):
+        year_data = process_year(year)
+        all_results.extend(year_data)
+
+    # Remove duplicates based on Article (KB)
+    seen_articles = set()
+    deduped = []
+
+    for entry in all_results:
+        article = entry.get("Article")
+
+        if article and article not in seen_articles:
+            seen_articles.add(article)
+            deduped.append(entry)
+
+    print(f"[+] Total unique security entries: {len(deduped)}")
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(deduped, f, indent=2)
+
+    print(f"[✓] JSON saved to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main()

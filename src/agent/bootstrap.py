@@ -8,14 +8,40 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
 import hashlib
 import sys
 import os
 
-# Internal modules
-from .environment import RuntimeContext, bootstrap_runtime_context
-from .os_fingerprint import get_os_metadata, get_capabilities
-from .exposure_scanner import ExposureScanner, ExposureData
+# Support running as both module and direct script
+_is_package = __name__ != "__main__"
+
+# Add parent directory to path for direct script execution
+if not _is_package:
+    sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+    sys.path.insert(0, str(Path(__file__).parent))
+
+# Internal modules - handle both relative and absolute imports
+try:
+    if _is_package:
+        from .environment import RuntimeContext, bootstrap_runtime_context
+        from .os_fingerprint import get_os_metadata, get_capabilities
+        from .exposure_scanner import ExposureScanner, ExposureData
+    else:
+        from environment import RuntimeContext, bootstrap_runtime_context
+        from os_fingerprint import get_os_metadata, get_capabilities
+        from exposure_scanner import ExposureScanner, ExposureData
+except ImportError as e:
+    logging.getLogger(__name__).error(f"Failed to import internal modules: {e}")
+    raise
+
+# Tools for missing patch detection
+try:
+    sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
+    from missing_patch import MissingPatchResolver
+except ImportError as e:
+    logging.getLogger(__name__).debug(f"Could not import MissingPatchResolver: {e}")
+    MissingPatchResolver = None
 
 # Existing components (assumed to exist)
 try:
@@ -35,7 +61,7 @@ try:
         WindowsAuditPolicyScanner,
         SecurityFinding
     )
-    from risk import hars_prioritization_runtime
+    from riskengine.risk import hars_prioritization_runtime
 except ImportError as e:
     logging.getLogger(__name__).warning(f"Optional import failed: {e}")
 
@@ -136,17 +162,54 @@ class SmartPatchOrchestrator:
         return hashlib.sha256(raw).hexdigest()
 
     def _get_installed_kbs_from_db(self) -> List[str]:
-        """Retrieve installed KBs from the latest scan in runtime DB."""
+        """Retrieve installed KBs from the latest scan in runtime DB, with fallback to OS metadata."""
         try:
+            # First try database
             cursor = self.db.conn.cursor()
             cursor.execute('''
                 SELECT kb_id FROM installed_patches
                 WHERE scan_time = (SELECT MAX(scan_time) FROM installed_patches)
             ''')
-            return [row['kb_id'] for row in cursor.fetchall()]
+            results = cursor.fetchall()
+            if results:
+                return [row['kb_id'] for row in results]
         except Exception as e:
-            logger.warning(f"Could not retrieve installed KBs: {e}")
-            return []
+            logger.warning(f"Could not retrieve installed KBs from database: {e}")
+        
+        # Fallback: Extract real KBs from OS metadata hotfixes (actual system data)
+        try:
+            hotfixes = self.os_metadata.get("hotfixes", [])
+            installed_kbs = []
+            import re
+            kb_pattern = re.compile(r'\bKB\d{5,7}\b', re.IGNORECASE)
+            
+            for hotfix in hotfixes:
+                # Try various KB field names
+                kb_id = None
+                if isinstance(hotfix, dict):
+                    kb_id = (hotfix.get("HotFixID") or 
+                            hotfix.get("HotFix") or 
+                            hotfix.get("KB") or
+                            hotfix.get("kb_id"))
+                elif isinstance(hotfix, str):
+                    match = kb_pattern.search(hotfix)
+                    if match:
+                        kb_id = match.group(0)
+                
+                if kb_id:
+                    kb_normalized = kb_id.upper().strip()
+                    if kb_normalized and kb_normalized not in installed_kbs:
+                        installed_kbs.append(kb_normalized)
+            
+            if installed_kbs:
+                logger.info(f"Retrieved {len(installed_kbs)} real installed KBs from system hotfixes")
+                return installed_kbs
+        except Exception as e:
+            logger.warning(f"Could not extract KBs from OS metadata: {e}")
+        
+        # No data found
+        logger.warning("No installed KBs found from database or hotfixes")
+        return []
 
     def _insert_system_record(self, host_hash: str) -> None:
         """Insert basic system info into runtime DB."""
@@ -204,6 +267,201 @@ class SmartPatchOrchestrator:
         ))
         self.db.conn.commit()
         logger.info(f"Asset profile saved for {profile.hostname}")
+
+    def _save_host_context_to_db(self, host_context: Dict[str, Any], host_hash: str, scan_time: str) -> None:
+        """Save the host_context to database with all real data."""
+        try:
+            cursor = self.db.conn.cursor()
+            
+            # Create host_context table if not exists
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS host_context (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    host_hash TEXT NOT NULL,
+                    scan_time TEXT NOT NULL,
+                    os_name TEXT,
+                    os_version TEXT,
+                    architecture TEXT,
+                    hostname TEXT,
+                    build_number TEXT,
+                    domain_joined INTEGER,
+                    domain_name TEXT,
+                    installed_kbs TEXT,
+                    missing_kbs TEXT,
+                    services TEXT,
+                    applications TEXT,
+                    UNIQUE(host_hash, scan_time)
+                )
+            ''')
+            
+            host = host_context.get("host", {})
+            
+            cursor.execute('''
+                INSERT OR REPLACE INTO host_context
+                (host_hash, scan_time, os_name, os_version, architecture, hostname,
+                 build_number, domain_joined, domain_name, installed_kbs, missing_kbs,
+                 services, applications)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                host_hash,
+                scan_time,
+                host.get("os_name", "Unknown"),
+                host.get("os_version", "Unknown"),
+                host.get("architecture", "Unknown"),
+                host.get("hostname", "UNKNOWN"),
+                host.get("build_number", ""),
+                1 if host.get("domain_joined", False) else 0,
+                host.get("domain_name", None),
+                json.dumps(host.get("installed_kbs", [])),
+                json.dumps(host.get("missing_kbs", [])),
+                json.dumps(host.get("services", {})),
+                json.dumps(host.get("applications", []))
+            ))
+            
+            self.db.conn.commit()
+            logger.info(f"Host context saved to database for {host.get('hostname', 'unknown')}")
+            
+            # Log database path for verification
+            db_path = self.db.db_path if hasattr(self.db, 'db_path') else "unknown"
+            logger.info(f"Data persisted to database: {db_path}")
+        except Exception as e:
+            logger.error(f"Failed to save host_context to database: {e}")
+
+    def _save_os_metadata_for_patch_resolver(self) -> Path:
+        """
+        Save OS metadata to JSON file for MissingPatchResolver to use.
+        Returns the path to the saved file.
+        """
+        try:
+            os_meta_file = Path(os.getenv("PROGRAMDATA", "C:\\ProgramData")) / "SmartPatch" / "runtime" / "os_metadata.json"
+            os_meta_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Prepare metadata
+            metadata = {
+                "os_info": self.os_metadata.get("os_info", {}),
+                "hotfixes": self.os_metadata.get("hotfixes", []),
+                "capabilities": self.capabilities,
+                "cache_timestamp": datetime.utcnow().isoformat()
+            }
+            
+            with open(os_meta_file, 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"OS metadata saved to: {os_meta_file}")
+            return os_meta_file
+        except Exception as e:
+            logger.error(f"Failed to save OS metadata: {e}")
+            return None
+
+    def _resolve_missing_patches(self, os_meta_file: Path) -> List[Dict[str, str]]:
+        """
+        Use MissingPatchResolver to identify missing patches from dev_db.sqlite.
+        Writes real data to runtime database.
+        Returns list of dicts with 'cve_id' and 'kb_id' keys.
+        """
+        if not MissingPatchResolver:
+            logger.warning("MissingPatchResolver not available; skipping missing patch resolution")
+            return []
+        
+        try:
+            # Find dev_db.sqlite
+            dev_db_path = Path(__file__).parent.parent / "database" / "dev_db.sqlite"
+            
+            # Use the actual runtime database that bootstrap is using (self.db.db_path)
+            if hasattr(self.db, 'db_path'):
+                runtime_db_path = self.db.db_path
+            else:
+                # Fallback: create dated database in runtime directory
+                runtime_dir = Path(os.getenv("PROGRAMDATA", "C:\\ProgramData")) / "SmartPatch" / "runtime"
+                runtime_dir.mkdir(parents=True, exist_ok=True)
+                scan_time = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                runtime_db_path = runtime_dir / f"runtime_{scan_time}.sqlite"
+            
+            if not dev_db_path.exists():
+                logger.warning(f"dev_db.sqlite not found at {dev_db_path}; cannot resolve missing patches")
+                return []
+            
+            logger.info(f"Using runtime database: {runtime_db_path}")
+            
+            # ENABLE write_runtime=True to persist missing patches data to runtime database
+            resolver = MissingPatchResolver(
+                os_meta_path=os_meta_file,
+                dev_db_path=dev_db_path,
+                runtime_db_path=runtime_db_path,
+                write_runtime=True  # ENABLED: Write real missing patches data to runtime DB
+            )
+            
+            # Run resolution - this will now save patch_state and installed_kbs to the runtime database
+            summary = resolver.resolve()
+            missing_patches = summary.get("missing", [])
+            
+            logger.info(f"Resolved and persisted {len(missing_patches)} missing KBs to runtime database")
+            return missing_patches
+        
+        except Exception as e:
+            logger.error(f"Failed to resolve missing patches: {e}")
+            return []
+
+    def _build_host_context(self, exposure_data: ExposureData, installed_kbs: List[str], 
+                           missing_kbs: List[Dict[str, str]]) -> Dict[str, Any]:
+        """
+        Build host context in the requested format using actual data from modules.
+        Uses exposure_scanner for services and missing_patch.py for missing KBs.
+        
+        Returns a dict with 'host' section containing:
+        - os_name, os_version, architecture
+        - installed_kbs (from OS metadata)
+        - missing_kbs (from dev_db via MissingPatchResolver)
+        - services (from exposure_scanner)
+        - applications (from OS metadata)
+        """
+        try:
+            os_info = self.os_metadata.get("os_info", {})
+            
+            # Build services dict from exposure_data
+            services_dict = {}
+            for svc in exposure_data.services:
+                service_name = svc.get("display_name") or svc.get("name", "Unknown")
+                # Try to extract version from display_name or use status
+                version = "Unknown"
+                status = svc.get("status", "Unknown")
+                services_dict[service_name] = version if version != "Unknown" else status
+            
+            # Extract applications from os_metadata (if available)
+            applications = []
+            if "applications" in self.os_metadata:
+                apps = self.os_metadata.get("applications", [])
+                if isinstance(apps, list):
+                    applications = apps
+                elif isinstance(apps, dict):
+                    applications = list(apps.keys())
+            
+            # Build missing KBs list
+            missing_kb_ids = [kb["kb_id"] for kb in missing_kbs if "kb_id" in kb]
+            
+            host_context = {
+                "host": {
+                    "os_name": os_info.get("Caption", "Unknown Windows OS"),
+                    "os_version": os_info.get("Version", "Unknown"),
+                    "architecture": os_info.get("OSArchitecture", "Unknown"),
+                    "installed_kbs": installed_kbs,
+                    "missing_kbs": missing_kb_ids,
+                    "services": services_dict,
+                    "applications": applications,
+                    "hostname": os_info.get("CSName", "UNKNOWN"),
+                    "build_number": os_info.get("BuildNumber", ""),
+                    "domain_joined": any(svc for svc in exposure_data.services),  # At least has services
+                    "domain_name": exposure_data.domain_name or None
+                }
+            }
+            
+            logger.info(f"Host context built with {len(installed_kbs)} installed KBs, {len(missing_kb_ids)} missing KBs")
+            return host_context
+        
+        except Exception as e:
+            logger.error(f"Failed to build host context: {e}")
+            return {"host": {}}
+
 
     def execute_scan(self) -> Dict[str, Any]:
         """Full scan: run all scanners, build asset profile, run risk."""
@@ -270,6 +528,16 @@ class SmartPatchOrchestrator:
                     logger.info(f"Exposure scan complete: {len(exposure_data.open_ports)} ports, {len(exposure_data.services)} services")
                 except Exception as e:
                     logger.error(f"Exposure scanner failed: {e}")
+            
+            # Fallback: If exposure scanner didn't provide services, get them directly
+            if not exposure_data.services:
+                try:
+                    # Direct scan for services using ExposureScanner
+                    direct_scanner = ExposureScanner()
+                    exposure_data = direct_scanner.scan()
+                    logger.info(f"Direct exposure scan: {len(exposure_data.services)} services found")
+                except Exception as e:
+                    logger.warning(f"Direct service scan failed: {e}")
 
             # ------------------------------------------------------------------
             # 3. Build the complete AssetProfile
@@ -290,6 +558,32 @@ class SmartPatchOrchestrator:
                 host_hash=host_hash
             )
             self._save_asset_profile(profile)
+
+            # ------------------------------------------------------------------
+            # 3a. Build host context with missing patches - PERSIST TO RUNTIME DB
+            # ------------------------------------------------------------------
+            logger.info("Building host context with missing patch detection...")
+            host_context = {}
+            scan_time = datetime.utcnow().isoformat()
+            try:
+                # Save OS metadata for MissingPatchResolver
+                os_meta_file = self._save_os_metadata_for_patch_resolver()
+                if os_meta_file:
+                    # Resolve missing patches from dev_db.sqlite (and save to runtime DB)
+                    missing_patches = self._resolve_missing_patches(os_meta_file)
+                    logger.info(f"Received {len(missing_patches)} missing patches from resolver")
+                    
+                    # Build formatted host context with REAL DATA
+                    host_context = self._build_host_context(exposure_data, installed_kbs, missing_patches)
+                    
+                    # Save host_context to database with real system data (KBs, services, etc.)
+                    self._save_host_context_to_db(host_context, host_hash, scan_time)
+                    logger.info(f"Host context built and persisted successfully")
+                else:
+                    logger.warning("Could not save OS metadata; skipping host context")
+            except Exception as e:
+                logger.error(f"Failed to build host context: {e}")
+                host_context = {"host": {}}
 
             # ------------------------------------------------------------------
             # 4. Risk prioritization (now with full profile)
@@ -313,6 +607,7 @@ class SmartPatchOrchestrator:
                 "scan_id": self.runtime_context.get_context_value("context_hash"),
                 "timestamp": datetime.utcnow().isoformat(),
                 "runtime_context": self.runtime_context.get_context(),
+                "host_context": host_context,
                 "os_metadata": {
                     "fingerprint_hash": self.os_metadata.get("fingerprint_hash"),
                     "os_info": {
@@ -340,7 +635,11 @@ class SmartPatchOrchestrator:
                 message=f"Scan completed with {len(all_findings)} findings",
                 component="orchestrator"
             )
+            
+            # Log runtime database path for verification
+            db_path = str(self.db.db_path) if hasattr(self.db, 'db_path') else "unknown"
             logger.info(f"Scan completed successfully")
+            logger.info(f"All data persisted to runtime database: {db_path}")
             return result
 
         except Exception as e:
@@ -399,16 +698,28 @@ if __name__ == "__main__":
     try:
         logger.info("Starting SmartPatch orchestrator...")
         results = run_orchestrator()
+        
+        # Extract and display host_context in the requested format
+        host_context = results.get("host_context", {})
+        
         print("\n" + "="*80)
-        print("SCAN COMPLETED SUCCESSFULLY")
+        print("SCAN COMPLETED - HOST CONTEXT OUTPUT (REAL SYSTEM DATA)")
         print("="*80)
-        print(f"Scan ID: {results.get('scan_id')}")
-        print(f"OS: {results.get('os_metadata', {}).get('os_info', {}).get('caption')}")
-        print(f"Open ports: {len(results.get('exposure', {}).get('open_ports', []))}")
-        print(f"Services: {len(results.get('exposure', {}).get('services', []))}")
-        print(f"Findings: {results.get('findings_total', 0)}")
-        print(f"Database: {results.get('database_path')}")
+        print(json.dumps(host_context, indent=2))
         print("="*80)
+        
+        # Also show summary
+        host = host_context.get("host", {})
+        print(f"\nScan Summary:")
+        print(f"  Hostname: {host.get('hostname', 'N/A')}")
+        print(f"  OS: {host.get('os_name', 'N/A')} (Build {host.get('build_number', 'N/A')})")
+        print(f"  Architecture: {host.get('architecture', 'N/A')}")
+        print(f"  Installed KBs: {len(host.get('installed_kbs', []))}")
+        print(f"  Missing KBs: {len(host.get('missing_kbs', []))}")
+        print(f"  Running Services: {len(host.get('services', {}))}")
+        print(f"  Domain: {host.get('domain_name', 'Not domain-joined')}")
+        print("="*80)
+        
     except Exception as e:
-        logger.error(f"Fatal error: {e}")
+        logger.error(f"Fatal error: {e}", exc_info=True)
         sys.exit(1)

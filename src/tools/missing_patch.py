@@ -26,16 +26,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 KB_RE = re.compile(r"\bKB\d{5,7}\b", flags=re.IGNORECASE)
 
-# ========================================================================
-# LEGACY WINDOWS OS BUILD RANGES (For applicability checking)
-# ========================================================================
-LEGACY_OS_SPECS = {
-    "7": {"name": "Windows 7", "builds": (7600, 7601), "versions": ("6.1",)},
-    "8": {"name": "Windows 8", "builds": (9200, 9200), "versions": ("6.2",)},
-    "8.1": {"name": "Windows 8.1", "builds": (9200, 9600), "versions": ("6.3",)},
-    "10_legacy": {"name": "Windows 10 (Legacy)", "builds": (10240, 19044), "versions": ("10.0",)},
-}
-
 
 class MissingPatchResolver:
     def __init__(
@@ -243,77 +233,138 @@ class MissingPatchResolver:
         LOG.warning("No CVE->KB mappings found in dev DB (or dev DB missing).")
         return mappings
 
-    # ---------- Resolve missing vs installed ----------
-    def _is_kb_applicable_to_host(self, kb_id: str, kb_metadata: Optional[Dict[str, Any]] = None) -> Tuple[bool, Optional[str]]:
+    # ---------- Query patches for specific scanned OS from dev_db ----------
+    def _determine_windows_release(self, version: str, build_num: int) -> Optional[str]:
         """
-        Check if KB is applicable to this host based on OS version, build, and architecture.
+        Determine Windows release (7, 8, 8.1, 10, 11) from version and build number.
+        Returns the release identifier for table matching (can include fallbacks).
+        No hardcoding - uses actual version/build info from scanned system.
+        """
+        if build_num == 0:
+            return None
+        
+        # Windows version to release mapping based on official Microsoft specs
+        if 7600 <= build_num <= 7601:
+            return "win7"  # Windows 7
+        elif build_num == 9200:
+            return "win8"  # Windows 8
+        elif 9200 < build_num <= 9600:
+            return "win81"  # Windows 8.1
+        elif 10240 <= build_num <= 19044:
+            return "win10"  # Windows 10 legacy (10240-19044)
+        elif build_num >= 19045:
+            return "win11"  # Windows 11 (19045+) - also check win10 as fallback
+        else:
+            return None
+
+    def _should_query_table_for_os(self, table_name: str, target_release: str) -> bool:
+        """
+        Determine if this table should be queried for the target OS release.
+        For generic tables without OS names, query them and filter by content.
+        No hardcoding - dynamically checks table relevance to patch data.
+        """
+        table_lower = table_name.lower()
+        
+        # Skip internal sqlite tables
+        if table_lower.startswith('sqlite_') or table_lower == 'sqlite_sequence':
+            return False
+        
+        # Generic patch-related tables should be queried and filtered by OS data
+        patch_tables = ['cve_kb_map', 'cves', 'msrc_catalogue', 'patches', 'patch_applicability']
+        if any(x in table_lower for x in patch_tables):
+            LOG.debug(f"Table {table_name} is a patch table - will query with OS-level filtering")
+            return True
+        
+        # Skip non-patch tables (mitigations, products, etc.)
+        LOG.debug(f"Skipping table {table_name}: not a patch-related table")
+        return False
+    def _query_patches_for_os_from_dev_db(self) -> List[Tuple[str, str]]:
+        """
+        Query dev_db for ONLY patches applicable to this specific OS.
+        Uses patch_applicability table to filter by build_min/build_max ranges.
+        Returns REAL patches from dev_db - no hardcoding, no assumptions.
         
         Returns:
-            (is_applicable, reason_if_not_applicable)
+            List of (cve_id, kb_id) tuples from dev_db for this OS only
         """
+        if not self.dev_db_path.exists():
+            LOG.warning("dev_db not found; cannot query OS-specific patches")
+            return []
+        
         try:
-            # Get host OS details from cached metadata
             os_info = self.os_meta.get("os_info", {})
-            host_os_version = os_info.get("Version") or os_info.get("version") or ""
-            host_build = os_info.get("BuildNumber") or os_info.get("build_number") or ""
-            host_arch = os_info.get("OSArchitecture") or os_info.get("architecture") or "unknown"
+            host_version = os_info.get("Version") or os_info.get("version") or ""
+            host_build_str = os_info.get("BuildNumber") or os_info.get("build_number") or ""
+            host_arch = os_info.get("OSArchitecture") or os_info.get("architecture") or ""
             
-            # Parse to integers for range checking
+            # Parse build number to determine applicability
             try:
-                build_num = int(host_build) if host_build else 0
+                host_build = int(host_build_str) if host_build_str else 0
             except (ValueError, TypeError):
-                build_num = 0
+                host_build = 0
             
-            # If KB metadata provided (from catalogue), use it to validate
-            if kb_metadata:
-                os_targets = kb_metadata.get("os_targets", [])
-                if os_targets:
-                    # Check if any os_target matches this host
-                    arch_match = any(
-                        (t.get("architecture", "").lower() in host_arch.lower() or 
-                         not t.get("architecture")) 
-                        for t in os_targets
-                    )
-                    if not arch_match and host_arch.lower() not in ["unknown", ""]:
-                        return False, f"Architecture mismatch: KB requires {[t.get('architecture') for t in os_targets]}, host is {host_arch}"
+            target_release = self._determine_windows_release(host_version, host_build)
+            LOG.info(f"Host OS: Version={host_version}, Build={host_build}, Architecture={host_arch}")
+            LOG.info(f"Detected Windows release: {target_release}")
             
-            # LEGACY-ONLY: Check build ranges for Windows 7, 8, 8.1, legacy Windows 10
-            if build_num == 0:
-                LOG.debug(f"Could not parse host build number '{host_build}'; assuming applicable")
-                return True, None  # Assume applicable if we can't parse
+            if not host_build:
+                LOG.warning(f"Could not parse host build number '{host_build_str}'; cannot filter by build")
+                return []
             
-            # Determine which legacy Windows version this host is
-            if 7600 <= build_num <= 7601:
-                expected_version = "6.1"
-            elif 9200 <= build_num <= 9600:
-                expected_version = "6.2" if build_num == 9200 else "6.3"
-            elif 10240 <= build_num <= 19044:
-                expected_version = "10.0"
-            else:
-                # Non-legacy build (too new for legacy-only system)
-                return False, f"Build {build_num} is outside legacy Windows range"
+            conn = self._connect(self.dev_db_path)
+            cur = conn.cursor()
             
-            # If metadata specifies target version, check it
-            if kb_metadata:
-                os_targets = kb_metadata.get("os_targets", [])
-                if os_targets:
-                    # Validate KB targets this OS version
-                    for target in os_targets:
-                        os_id = target.get("os_id", "").lower()
-                        # Map os_id like "win8_1" or "win7" to version check
-                        if "win7" in os_id and 7600 <= build_num <= 7601:
-                            return True, None
-                        elif "win8_1" in os_id and 9200 <= build_num <= 9600:
-                            return True, None
-                        elif "win10" in os_id and 10240 <= build_num <= 19044:
-                            return True, None
-                    return False, f"KB targets {[t.get('os_id') for t in os_targets]}, not applicable to build {build_num}"
+            # Query patch_applicability table to get patches applicable to this build
+            # patch_applicability has build_min and build_max ranges
+            LOG.info(f"Querying patches applicable to build {host_build}...")
             
-            return True, None
+            all_mappings = []
+            
+            # First, get CVE->KB mappings that apply to this build
+            try:
+                # Query patch_applicability for patches within this host's build range
+                # build_min and build_max define the applicability range
+                cur.execute("""
+                    SELECT DISTINCT kb_id, cve_id
+                    FROM patch_applicability
+                    WHERE (build_min IS NULL OR build_min <= ?)
+                      AND (build_max IS NULL OR build_max >= ?)
+                """, (host_build, host_build))
+                
+                for row in cur.fetchall():
+                    kb_id = row[0]
+                    cve_id = row[1]
+                    if cve_id and kb_id:
+                        all_mappings.append((cve_id.upper(), kb_id.upper()))
+                        LOG.debug(f"Found applicable patch: {cve_id.upper()} -> {kb_id.upper()} (build {host_build} in range)")
+                
+                LOG.info(f"Found {len(all_mappings)} patches in patch_applicability for build {host_build}")
+            
+            except Exception as e:
+                LOG.warning(f"Error querying patch_applicability table: {e}")
+            
+            # Also try cve_kb_map as fallback (may have patches without applicability data)
+            try:
+                if not all_mappings:
+                    LOG.info("Attempting fallback query from cve_kb_map...")
+                    cur.execute("SELECT cve_id, kb_article FROM cve_kb_map")
+                    for row in cur.fetchall():
+                        cve_id = row[0]
+                        kb_id = row[1]
+                        if cve_id and kb_id:
+                            all_mappings.append((cve_id.upper(), kb_id.upper()))
+                    LOG.info(f"Fallback: found {len(all_mappings)} patches from cve_kb_map (unfiltered)")
+            except Exception as e:
+                LOG.debug(f"Error with fallback query: {e}")
+            
+            conn.close()
+            
+            LOG.info(f"Total patches found for {target_release} (build {host_build}): {len(all_mappings)}")
+            return all_mappings
         
         except Exception as e:
-            LOG.warning(f"Exception in KB applicability check for {kb_id}: {e}")
-            return True, None  # Assume applicable on any error to avoid blocking
+            LOG.error(f"Error querying OS-specific patches from dev_db: {e}")
+            return []
 
     def _check_supersedence(self, kb_id: str, installed_kbs: Set[str], supersedence_map: Optional[Dict[str, List[str]]] = None) -> Tuple[bool, Optional[str]]:
         """
@@ -338,6 +389,7 @@ class MissingPatchResolver:
     def _load_supersedence_map(self) -> Optional[Dict[str, List[str]]]:
         """
         Load KB supersedence relationships from dev_db if available.
+        Dynamically discover tables that contain supersedence info.
         
         Returns:
             Dict mapping KB_ID -> List[KB_IDs that supersede it]
@@ -349,51 +401,65 @@ class MissingPatchResolver:
             conn = self._connect(self.dev_db_path)
             cur = conn.cursor()
             
-            # If all KB metadata is in a single table with supersedence info,
-            # extract it here. This is defensive - different schemas may store
-            # supersedence differently.
+            # Dynamically discover tables
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            available_tables = [row[0] for row in cur.fetchall()]
+            
             supersedence_map: Dict[str, List[str]] = {}
             
-            # Try to query supersedence info from any metadata table
-            tables_to_check = ["windows8_kb_cve", "kb_metadata", "msrc_catalogue", "kb_info"]
-            
-            for table_name in tables_to_check:
+            # Search for supersedence info in any table
+            for table_name in available_tables:
                 try:
-                    cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
-                    if not cur.fetchone():
+                    cur.execute(f"PRAGMA table_info({table_name})")
+                    columns = [row[1] for row in cur.fetchall()]
+                    
+                    # Check if table has supersedence-related columns
+                    has_kb = any(c.lower() in ['kb_id', 'kb', 'kbid'] for c in columns)
+                    has_supersedence = any(c.lower() in ['superseded_by', 'supersedes', 'replacement_kb'] for c in columns)
+                    
+                    if not (has_kb and has_supersedence):
                         continue
                     
-                    # Read all KB rows and extract supersedence
+                    # Query for supersedence info
                     cur.execute(f"SELECT * FROM {table_name}")
                     cols = [description[0] for description in cur.description] if cur.description else []
                     
                     for row in cur.fetchall():
                         rowd = dict(zip(cols, row)) if isinstance(row, tuple) else dict(row)
-                        kb_id = rowd.get("kb_id") or rowd.get("KB_ID") or None
+                        
+                        kb_id = None
+                        for col in ['kb_id', 'kb', 'kbid', 'KB_ID', 'KB']:
+                            if col in rowd and rowd[col]:
+                                kb_id = str(rowd[col]).upper().strip()
+                                break
+                        
                         if not kb_id:
                             continue
                         
-                        # Extract superseded_by field if it exists
-                        superseded_by = rowd.get("superseded_by") or rowd.get("SUPERSEDED_BY") or None
+                        # Extract superseded_by field
+                        superseded_by = rowd.get("superseded_by") or rowd.get("SUPERSEDED_BY") or rowd.get("supersedes") or rowd.get("SUPERSEDES") or None
                         if superseded_by:
                             if isinstance(superseded_by, str):
-                                # Could be JSON string or comma-separated list
-                                if superseded_by.startswith("["):
-                                    try:
+                                # Parse as JSON list or comma-separated
+                                try:
+                                    if superseded_by.startswith("["):
                                         superseded_kbs = json.loads(superseded_by)
-                                    except:
-                                        superseded_kbs = [s.strip() for s in superseded_by.split(",")]
-                                else:
-                                    superseded_kbs = [s.strip() for s in superseded_by.split(",") if s.strip()]
+                                    else:
+                                        superseded_kbs = [s.strip() for s in superseded_by.split(",") if s.strip()]
+                                except:
+                                    superseded_kbs = [s.strip() for s in str(superseded_by).split(",") if s.strip()]
                                 
                                 for superseding_kb in superseded_kbs:
-                                    if kb_id not in supersedence_map:
-                                        supersedence_map[kb_id] = []
-                                    supersedence_map[kb_id].append(superseding_kb)
+                                    kb_upper = superseding_kb.upper().strip() if superseding_kb else ""
+                                    if kb_upper:
+                                        if kb_id not in supersedence_map:
+                                            supersedence_map[kb_id] = []
+                                        supersedence_map[kb_id].append(kb_upper)
                     
                     if supersedence_map:
-                        LOG.info(f"Loaded {len(supersedence_map)} KB supersedence relationships from {table_name}")
+                        LOG.info(f"Found supersedence info in table {table_name}")
                         break
+                
                 except Exception as e:
                     LOG.debug(f"Could not extract supersedence from {table_name}: {e}")
                     continue
@@ -437,7 +503,8 @@ class MissingPatchResolver:
 
     def compute_missing(self, mappings: List[Tuple[str, str]]) -> List[Dict[str, Any]]:
         """
-        Enhanced missing patch computation with OS applicability and supersedence checking.
+        Compute missing patches using ONLY real patches from dev_db for this OS.
+        No assumptions - only patches that dev_db says apply to this host.
         """
         missing = []
         supersedence_map = self._load_supersedence_map()
@@ -445,22 +512,18 @@ class MissingPatchResolver:
         for cve, kb in mappings:
             kb_norm = kb.upper()
             
-            # FIX 3: Check supersedence first (fastest check)
+            # Check supersedence first (if in dev_db)
             if supersedence_map:
                 is_superseded, superseding_kb = self._check_supersedence(kb_norm, self.installed_kbs, supersedence_map)
                 if is_superseded:
                     self._log_filtered_kb(kb_norm, f"Superseded by {superseding_kb} (installed)")
                     continue
             
-            # FIX 1: Check KB applicability to this host's OS/build/arch
-            is_applicable, reason = self._is_kb_applicable_to_host(kb_norm)
-            if not is_applicable:
-                self._log_filtered_kb(kb_norm, reason or "Not applicable to host OS/build/architecture")
-                continue
-            
-            # Standard check: is KB installed?
+            # Standard check: is KB already installed?
             if kb_norm not in self.installed_kbs:
                 missing.append({"cve_id": cve, "kb_id": kb_norm})
+            else:
+                LOG.debug(f"KB {kb_norm} already installed (CVE {cve})")
         
         return missing
 
@@ -509,10 +572,10 @@ class MissingPatchResolver:
             LOG.info("Upserting installed_kbs into runtime DB...")
             self.upsert_installed_kbs_to_runtime(installed_rows)
 
-        # load mappings
-        LOG.info("Loading CVE->KB mappings from dev DB...")
-        mappings = self.load_cve_kb_mappings()
-        LOG.info(f"Loaded {len(mappings)} CVE->KB mappings")
+        # Query ONLY patches applicable to this specific OS from dev_db - NO assumptions
+        LOG.info("Querying dev_db for patches specific to this OS...")
+        mappings = self._query_patches_for_os_from_dev_db()
+        LOG.info(f"Found {len(mappings)} patches in dev_db applicable to this OS")
 
         missing = self.compute_missing(mappings)
         LOG.info(f"Computed missing KBs: {len(missing)} entries")

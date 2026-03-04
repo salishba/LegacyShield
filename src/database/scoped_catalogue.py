@@ -204,6 +204,11 @@ def ingest_directory(json_dir: Path, db_path: Path, msrc_csv: Optional[Path] = N
         log.info("Processing %s", f.name)
         data = load_json(f)
 
+        # Skip files that don't have a controls key (e.g., epss.json, kev.json)
+        if not isinstance(data, dict) or "controls" not in data:
+            log.info("Skipping %s (no 'controls' key)", f.name)
+            continue
+
         for control in data.get("controls", []):
             mitigations = build_mitigations(control, f.name)
             for m in mitigations:
