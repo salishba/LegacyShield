@@ -1,0 +1,37 @@
+# SmartPatch Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core Framework
+Flask==2.3.3
+flask-cors==4.0.0
+Werkzeug==2.3.7
+
+# Data Processing
+pandas==2.0.3
+numpy==1.24.3
+sqlite3  # Built-in to Python
+
+# Machine Learning & NLP
+scikit-learn==1.3.0
+sentence-transformers==2.2.2
+torch==2.0.1
+transformers==4.30.2
+
+# Vector Search
+faiss-cpu==1.7.4
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+requests==2.31.0
+
+# Optional: For PyInstaller packaging
+# pyinstaller==6.0
+
+# Optional: For Windows Service
+# pywin32==306
+
+# Optional: For async support (future)
+# fastapi==0.103.0
+# uvicorn==0.23.2
+# websockets==11.0
